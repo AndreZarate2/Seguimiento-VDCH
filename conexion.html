@@ -85,6 +85,135 @@ tr:hover td{background:#f8fafc!important}
 .page-note{font-size:12px;color:#64748b;line-height:1.45;margin-top:8px}
 @media (max-width:700px){.project-home-grid{grid-template-columns:1fr}}
 
+
+
+/* ===== Orden solicitado: tabla primero, Gantt despues, con flechas de dependencia ===== */
+.gantt-tree-wrap{position:relative;--gantt-label-width:360px;--gantt-gap:12px;--gantt-row-h:64px}
+.gantt-row{height:var(--gantt-row-h)!important;min-height:var(--gantt-row-h)!important;position:relative;z-index:2}
+.gantt-track{position:relative;z-index:3}
+.gantt-bar{position:absolute;z-index:5}
+.gantt-dep-svg{position:absolute;left:calc(var(--gantt-label-width) + var(--gantt-gap));top:0;width:calc(100% - var(--gantt-label-width) - var(--gantt-gap));height:100%;pointer-events:none;z-index:6;overflow:visible}
+.gantt-dep-path{fill:none;stroke:#64748b;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;opacity:.55}
+.gantt-dep-path.blocked{stroke:#b91c1c;opacity:.45;stroke-dasharray:5 4}
+.gantt-dep-dot{fill:#64748b;opacity:.65}
+.gantt-row.gantt-blocked .gantt-label{color:#334155!important}
+@media (max-width:900px){.gantt-tree-wrap{--gantt-label-width:280px}}
+
+
+
+/* ===== Ajustes finales: plegado independiente, limpieza visual y flechas legibles ===== */
+.gantt-tree-wrap{
+  position:relative;
+  --gantt-label-width:380px;
+  --gantt-gap:14px;
+  --gantt-row-h:58px;
+}
+.gantt-row{
+  grid-template-columns:var(--gantt-label-width) 1fr !important;
+  gap:var(--gantt-gap) !important;
+  height:var(--gantt-row-h) !important;
+  min-height:var(--gantt-row-h) !important;
+  position:relative;
+  z-index:2;
+}
+.gantt-scale{grid-template-columns:var(--gantt-label-width) 1fr !important;gap:var(--gantt-gap) !important}
+.today-line{left:calc(var(--gantt-label-width) + var(--gantt-gap) + var(--today-pos,0%))!important;z-index:8}
+.gantt-label{gap:7px!important;align-items:flex-start!important}
+.gantt-label-title{font-weight:800;color:#1f2937}
+.gantt-label-sub{font-size:10.5px;color:#64748b;font-weight:700;line-height:1.35}
+.gantt-track{z-index:3;overflow:visible!important}
+.gantt-bar{z-index:5;box-shadow:0 1px 2px rgba(15,23,42,.14)}
+.gantt-row.gantt-group-main,.gantt-row.gantt-group-sub,.gantt-row.gantt-group-minor{background:#f8fafc!important}
+.gantt-row.gantt-group-main .gantt-label-title,.gantt-row.gantt-group-sub .gantt-label-title,.gantt-row.gantt-group-minor .gantt-label-title{font-weight:900}
+.gantt-row.gantt-activity{background:#fff!important}
+.gantt-row.is-collapsed .gantt-label{box-shadow:none!important}
+.gantt-row.gantt-blocked .gantt-label{color:#334155!important}
+.gantt-row.gantt-blocked .gantt-track{outline:0!important}
+.gantt-dep-svg{
+  position:absolute;
+  left:calc(var(--gantt-label-width) + var(--gantt-gap));
+  top:0;
+  width:calc(100% - var(--gantt-label-width) - var(--gantt-gap));
+  height:100%;
+  pointer-events:none;
+  z-index:6;
+  overflow:visible;
+}
+.gantt-dep-path{
+  fill:none;
+  stroke:#475569;
+  stroke-width:1.65;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  opacity:.72;
+  vector-effect:non-scaling-stroke;
+}
+.gantt-dep-path.blocked{stroke:#b91c1c;opacity:.72;stroke-dasharray:6 5}
+.gantt-dep-dot{fill:#475569;opacity:.78}
+.gantt-dep-dot.blocked{fill:#b91c1c;opacity:.78}
+.gantt-legend{display:flex;flex-wrap:wrap;gap:10px;align-items:center;color:#64748b;font-size:12px}
+.gantt-legend-item{display:inline-flex;align-items:center;gap:6px;font-weight:800}
+.gantt-legend-line{width:32px;height:0;border-top:2px solid #475569;display:inline-block;position:relative}
+.gantt-legend-line:after{content:"";position:absolute;right:-1px;top:-4px;border-left:7px solid #475569;border-top:4px solid transparent;border-bottom:4px solid transparent}
+.gantt-legend-line.blocked{border-top-color:#b91c1c;border-top-style:dashed}.gantt-legend-line.blocked:after{border-left-color:#b91c1c}
+.hierarchy-chip.group-main,.hierarchy-chip.group-sub,.hierarchy-chip.activity{display:none!important}
+.table-hierarchy-info{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:9px 11px}
+.table-group-row td{border-top:1px solid #d8e0ea!important}
+.table-group-row.level-1 td,.table-group-row.level-2 td{background:#f3f6fa!important;border-top:1px solid #cfd8e6!important}
+.table-group-row.level-3 td,.table-group-row.level-4 td{background:#f8fafc!important}
+.tree-toggle{color:#334155!important;border-color:#cbd5e1!important;background:#fff!important;box-shadow:none!important}
+.tree-toggle:hover{background:#f8fafc!important;border-color:#94a3b8!important}
+.tree-toggle.collapsed{background:#f8fafc!important}
+.is-collapsed td{box-shadow:none!important}
+@media (max-width:900px){.gantt-tree-wrap{--gantt-label-width:300px}.gantt-inner{min-width:1120px}}
+
+
+
+
+/* ===== Logo corporativo CVC ===== */
+.sidebar .brand{
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  gap:10px!important;
+  margin-bottom:24px!important;
+}
+.sidebar .logo{
+  width:220px!important;
+  max-width:100%!important;
+  height:auto!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+  display:block!important;
+  padding:0!important;
+  color:#2537a6!important;
+}
+.sidebar .logo img{
+  width:100%!important;
+  height:auto!important;
+  object-fit:contain!important;
+  display:block!important;
+  border-radius:0!important;
+}
+.sidebar .brand h1{font-size:18px!important;letter-spacing:-.01em}
+.sidebar .brand p{font-size:12px!important;margin-top:5px!important}
+@media (max-width:1100px){
+  .sidebar .brand{flex-direction:row!important;align-items:center!important}
+  .sidebar .logo{width:170px!important}
+}
+@media (max-width:700px){
+  .sidebar .brand{flex-direction:column!important;align-items:flex-start!important}
+  .sidebar .logo{width:190px!important}
+}
+
+/* Dependencias en espera: color sobrio tipo advertencia */
+.dep-badge.blocked{background:#fef3c7!important;color:#92400e!important}
+.dep-item.blocked{background:#fffbeb!important;border-color:#fde68a!important}
+.gantt-dep-path.blocked{stroke:#b45309!important;opacity:.8!important}
+.gantt-dep-dot.blocked{fill:#b45309!important;opacity:.85!important}
+.gantt-legend-line.blocked{border-top-color:#b45309!important}
+.gantt-legend-line.blocked:after{border-left-color:#b45309!important}
 </style>
 </head>
 <body>
@@ -98,7 +227,7 @@ tr:hover td{background:#f8fafc!important}
     <div class="side-card"><h3>Fecha de control</h3><p>El avance usa la fecha del navegador para avanzar automáticamente. Fecha de referencia inicial: <b>17/06/2026</b>.</p><div class="field"><label>Modo</label><select id="date-mode"><option value="auto">Automática: hoy del navegador</option><option value="manual">Manual para revisión</option></select></div><div class="field" style="margin-top:8px"><label>Fecha manual</label><input type="date" id="manual-date" value="2026-06-17"></div><button class="btn small" style="margin-top:10px" onclick="applyDateSettings()">Actualizar seguimiento</button></div>
   </aside>
   <main class="main">
-    <section class="hero" id="inicio"><span class="eyebrow">Proyecto Conexión VDCH</span><h2>Gantt y tabla de seguimiento · Conexión VDCH</h2><p>Vista exclusiva del cronograma de Conexión VDCH. Mantiene el desglose por grupos y subgrupos, flechas para expandir/contraer, dependencias del Project, bloqueo por predecesores y confirmación individual o por grupo culminado.</p><div class="hero-actions"><a class="btn primary" href="#p-conexion-vdch">Ver Gantt y tabla</a><a class="btn" href="index.html">Volver al inicio general</a><a class="btn" href="alimentador.html">Ir a Alimentador Sullana</a><button class="btn green" onclick="exportExcel('conexion-vdch')">Exportar Conexión</button><button class="btn ghost" onclick="showOpeningAlerts(true)">Ver alertas</button></div><div class="grid metrics" id="global-metrics"></div></section>
+    <section class="hero" id="inicio"><span class="eyebrow">Proyecto Conexión VDCH</span><h2>Gantt y tabla de seguimiento · Conexión VDCH</h2><p>Vista exclusiva del cronograma de Conexión VDCH. Mantiene el desglose por grupos y subgrupos, flechas para expandir/contraer, dependencias del Project, dependencia por predecesores y confirmación individual o por grupo culminado.</p><div class="hero-actions"><a class="btn primary" href="#p-conexion-vdch">Ver Gantt y tabla</a><a class="btn" href="index.html">Volver al inicio general</a><a class="btn" href="alimentador.html">Ir a Alimentador Sullana</a><button class="btn green" onclick="exportExcel('conexion-vdch')">Exportar Conexión</button><button class="btn ghost" onclick="showOpeningAlerts(true)">Ver alertas</button></div><div class="grid metrics" id="global-metrics"></div></section>
     <section class="section" id="verificacion"><div class="section-head"><div><h2>Verificación de cronogramas comprendidos</h2><p>Control de integridad del documento frente a los archivos fuente cargados.</p></div><span class="badge done">✓ Verificado</span></div><div class="verify" id="verification-grid"></div><div class="table-wrap" style="margin-top:16px"><table id="verification-table"><thead><tr><th>Proyecto</th><th>Archivo fuente</th><th>Registros totales</th><th>Actividades</th><th>Fases / resumen</th><th>Periodo</th></tr></thead><tbody></tbody></table></div></section>
     <section class="section" id="estado-actual"><div class="section-head"><div><h2>Estado actual automático</h2><p>Calculado con fecha de control: <b id="control-date-label">17/06/2026</b>. El porcentaje avanza solo con el paso de los días.</p></div><button class="btn" onclick="showOpeningAlerts(true)">Abrir alertas</button></div><div class="kpi-row" id="status-kpis"></div><div class="tabs" id="quick-filters"><button class="tab active" data-status="all" onclick="setGlobalStatus('all')">Todos</button><button class="tab" data-status="Pendiente" onclick="setGlobalStatus('Pendiente')">Pendientes</button><button class="tab" data-status="En ejecución" onclick="setGlobalStatus('En ejecución')">En ejecución</button><button class="tab" data-status="Vencido" onclick="setGlobalStatus('Vencido')">Vencidos</button><button class="tab" data-status="Terminado" onclick="setGlobalStatus('Terminado')">Terminados</button></div><div class="two-col"><div class="alert-box"><h4>Procesos en ejecución actualmente <span class="badge running" id="running-count">0</span></h4><div class="alert-list" id="running-list"></div></div><div class="alert-box"><h4>Vencidos por confirmar <span class="badge overdue" id="overdue-count">0</span></h4><div class="alert-list" id="overdue-list"></div></div></div></section>
     <section class="section" id="project-sections"></section>
@@ -267,7 +396,7 @@ function renderVerification(){const projects=activeProjects(); const totalReg=pr
 function renderStatus(){const stats=summaryStats(allTasks()); const cards=[['Pendientes',stats.pendiente,'status-pending'],['En ejecución',stats.ejecucion,'status-running'],['Vencidos',stats.vencido,'status-overdue'],['Terminados',stats.terminado,'status-done'],['Por confirmar',stats.confirmar,'status-confirm'],['Avance global',pct(weightedGlobalProgress())+'%','status-summary']]; document.getElementById('status-kpis').innerHTML=cards.map(c=>`<div class="status-card ${c[2]}"><span>${c[0]}</span><b>${c[1]}</b></div>`).join(''); const running=leafTasks().filter(runningToday).sort(sortByDate); const overdue=leafTasks().filter(t=>statusOfLeaf(t)==='Vencido').sort(sortByDate); document.getElementById('running-count').textContent=running.length; document.getElementById('overdue-count').textContent=overdue.length; document.getElementById('running-list').innerHTML=listItems(running,12,'No hay actividades en ejecución actualmente.'); document.getElementById('overdue-list').innerHTML=listItems(overdue,12,'No hay actividades vencidas por confirmar.');}
 function renderProjectSections(){const wrap=document.getElementById('project-sections'); const projects=activeProjects(); if(PAGE_KIND==='home'){wrap.innerHTML=`<div class="section-head"><div><h2>Acceso por proyecto</h2><p>Selecciona el cronograma que deseas revisar. Cada vista mantiene la misma lógica de Gantt plegable, tabla de seguimiento, dependencias y confirmaciones en Supabase.</p></div><span class="badge summary">${projects.length} proyectos</span></div><div class="project-home-grid">${projects.map(p=>homeProjectCard(p)).join('')}</div>`; return;} wrap.innerHTML=projects.map(p=>projectHTML(p)).join(''); projects.forEach(p=>{renderProjectKPIs(p.id); renderGantt(p.id); renderTable(p.id);});}
 function homeProjectCard(p){const stats=summaryStats(p.tasks); const prog=pct(projectProgress(p.id)); const href=p.id==='conexion-vdch'?'conexion.html':'alimentador.html'; return `<article class="project-home-card"><span class="eyebrow">${escapeHTML(p.short||p.name)}</span><h3>${escapeHTML(p.name)}</h3><p>${escapeHTML(p.description||'Cronograma de seguimiento')}</p><div class="meta"><span class="badge pending">${isoToDMY(p.start)} - ${isoToDMY(p.finish)}</span><span class="badge done">${p.tasks.length} registros</span><span class="badge running">${p.verification.activities_total} actividades</span><span class="badge summary">${prog}% avance</span></div><div class="project-card-actions"><a class="btn primary" href="${href}">Abrir Gantt y tabla</a><button class="btn" onclick="exportExcel('${p.id}')">Exportar Excel</button></div><p class="page-note">Vencidos por confirmar: <b>${stats.vencido}</b> · En ejecución: <b>${stats.ejecucion}</b> · Terminados: <b>${stats.terminado}</b></p></article>`;}
-function projectHTML(p){return `<section id="p-${p.id}" style="scroll-margin-top:20px;margin-bottom:28px"><div class="project-header"><div class="project-card"><span class="eyebrow">${escapeHTML(p.short||p.name)}</span><h2>${escapeHTML(p.name)}</h2><p>${escapeHTML(p.description||'Cronograma de ejecución de obra')}</p><div class="meta"><span class="badge summary">${escapeHTML(p.source_file||'Archivo .mpp')}</span><span class="badge pending">${isoToDMY(p.start)} - ${isoToDMY(p.finish)}</span><span class="badge done">${p.tasks.length} registros</span><span class="badge running">${p.verification.activities_total} actividades</span></div></div><div class="project-card"><h3>Avance del proyecto</h3><strong style="font-size:42px" id="project-progress-${p.id}">0%</strong><div class="progress" style="margin-top:10px"><i id="project-progress-bar-${p.id}"></i></div><p id="project-status-${p.id}"></p></div></div><div class="kpi-row" id="kpis-${p.id}" style="margin-top:14px"></div><div class="section" style="box-shadow:none;margin-top:16px;padding:16px"><div class="section-head"><div><h3>Gantt plegable por grupos y subgrupos · ${escapeHTML(p.short||p.name)}</h3><p>Usa la flecha para desglosar o agrupar cada fase. El Gantt muestra los amarres del Project: si un predecesor no está terminado, la actividad queda marcada como bloqueada.</p></div><div class="gantt-actions"><button class="btn small" onclick="setProjectTree('${p.id}',false)">Expandir todo</button><button class="btn small" onclick="setProjectTree('${p.id}',true)">Contraer todo</button><button class="btn small" onclick="exportExcel('${p.id}')">Excel ${escapeHTML(p.short||p.name)}</button></div></div><div class="gantt" id="gantt-${p.id}"></div></div><div class="section" style="box-shadow:none;margin-top:16px;padding:16px"><div class="section-head"><div><h3>Tabla de seguimiento plegable · ${escapeHTML(p.short||p.name)}</h3><p>La tabla se puede agrupar y desglosar con flechas. También muestra qué actividades están amarradas a procesos anteriores y cuáles están bloqueadas por predecesores no terminados.</p></div><div class="table-actions"><button class="btn small" onclick="setProjectTree('${p.id}',false)">Expandir todo</button><button class="btn small" onclick="setProjectTree('${p.id}',true)">Contraer todo</button><button class="btn small" onclick="clearProjectFilters('${p.id}')">Limpiar filtros</button></div></div><div class="controls"><div class="field"><label>Buscar</label><input id="search-${p.id}" placeholder="Actividad, grupo, subgrupo, responsable o predecesor..." oninput="renderTable('${p.id}')"></div><div class="field"><label>Estado</label><select id="filter-status-${p.id}" onchange="renderTable('${p.id}')"><option value="all">Todos</option><option>Pendiente</option><option>En ejecución</option><option>Vencido</option><option>Terminado</option></select></div><div class="field"><label>Tipo</label><select id="filter-type-${p.id}" onchange="renderTable('${p.id}')"><option value="all">Todos</option><option value="summary">Grupos / subgrupos</option><option value="task">Actividades</option></select></div><div class="field"><label>Ruta crítica</label><select id="filter-critical-${p.id}" onchange="renderTable('${p.id}')"><option value="all">Todos</option><option value="critical">Crítica</option><option value="noncritical">No crítica</option></select></div><div class="field"><label>Amarre</label><select id="filter-dependency-${p.id}" onchange="renderTable('${p.id}')"><option value="all">Todos</option><option value="linked">Amarradas</option><option value="blocked">Bloqueadas</option><option value="free">Sin amarre</option></select></div></div><div class="table-hierarchy-info" id="table-hint-${p.id}"></div><div class="table-wrap"><table id="table-${p.id}"><thead><tr><th>Código</th><th>Grupo / subgrupo / actividad</th><th>Inicio</th><th>Fin</th><th>Duración</th><th>Avance auto.</th><th>Estado</th><th>Amarre / predecesores</th><th>Confirmación</th><th>Responsable / notas</th></tr></thead><tbody></tbody></table></div></div></section>`}
+function projectHTML(p){return `<section id="p-${p.id}" style="scroll-margin-top:20px;margin-bottom:28px"><div class="project-header"><div class="project-card"><span class="eyebrow">${escapeHTML(p.short||p.name)}</span><h2>${escapeHTML(p.name)}</h2><p>${escapeHTML(p.description||'Cronograma de ejecución de obra')}</p><div class="meta"><span class="badge summary">${escapeHTML(p.source_file||'Archivo .mpp')}</span><span class="badge pending">${isoToDMY(p.start)} - ${isoToDMY(p.finish)}</span><span class="badge done">${p.tasks.length} registros</span><span class="badge running">${p.verification.activities_total} actividades</span></div></div><div class="project-card"><h3>Avance del proyecto</h3><strong style="font-size:42px" id="project-progress-${p.id}">0%</strong><div class="progress" style="margin-top:10px"><i id="project-progress-bar-${p.id}"></i></div><p id="project-status-${p.id}"></p></div></div><div class="kpi-row" id="kpis-${p.id}" style="margin-top:14px"></div><div class="section" style="box-shadow:none;margin-top:16px;padding:16px"><div class="section-head"><div><h3>Tabla de seguimiento plegable · ${escapeHTML(p.short||p.name)}</h3><p>La tabla inicia agrupada para revisar el cronograma por fases. Usa la flecha para desglosar grupos, subgrupos y actividades. También muestra qué actividades están amarradas a procesos anteriores y cuáles están dependientes por predecesores no terminados.</p></div><div class="table-actions"><button class="btn small" onclick="setProjectTree('${p.id}',false)">Expandir todo</button><button class="btn small" onclick="setProjectTree('${p.id}',true)">Contraer todo</button><button class="btn small" onclick="clearProjectFilters('${p.id}')">Limpiar filtros</button></div></div><div class="controls"><div class="field"><label>Buscar</label><input id="search-${p.id}" placeholder="Actividad, grupo, subgrupo, responsable o predecesor..." oninput="renderTable('${p.id}')"></div><div class="field"><label>Estado</label><select id="filter-status-${p.id}" onchange="renderTable('${p.id}')"><option value="all">Todos</option><option>Pendiente</option><option>En ejecución</option><option>Vencido</option><option>Terminado</option></select></div><div class="field"><label>Tipo</label><select id="filter-type-${p.id}" onchange="renderTable('${p.id}')"><option value="all">Todos</option><option value="summary">Grupos / subgrupos</option><option value="task">Actividades</option></select></div><div class="field"><label>Ruta crítica</label><select id="filter-critical-${p.id}" onchange="renderTable('${p.id}')"><option value="all">Todos</option><option value="critical">Crítica</option><option value="noncritical">No crítica</option></select></div><div class="field"><label>Amarre</label><select id="filter-dependency-${p.id}" onchange="renderTable('${p.id}')"><option value="all">Todos</option><option value="linked">Amarradas</option><option value="blocked">Dependientes</option><option value="free">Sin amarre</option></select></div></div><div class="table-hierarchy-info" id="table-hint-${p.id}"></div><div class="table-wrap"><table id="table-${p.id}"><thead><tr><th>Código</th><th>Grupo / subgrupo / actividad</th><th>Inicio</th><th>Fin</th><th>Duración</th><th>Avance auto.</th><th>Estado</th><th>Amarre / predecesores</th><th>Confirmación</th><th>Responsable / notas</th></tr></thead><tbody></tbody></table></div></div><div class="section" style="box-shadow:none;margin-top:16px;padding:16px"><div class="section-head"><div><h3>Gantt plegable con amarres · ${escapeHTML(p.short||p.name)}</h3><p>El Gantt aparece después de la tabla. Al desglosar, las flechas grises muestran las relaciones del Project entre procesos predecesores y sucesores. Las flechas punteadas indican procesos dependientes de predecesores no terminados.</p></div><div class="gantt-actions"><button class="btn small" onclick="setProjectTree('${p.id}',false)">Expandir todo</button><button class="btn small" onclick="setProjectTree('${p.id}',true)">Contraer todo</button><button class="btn small" onclick="exportExcel('${p.id}')">Excel ${escapeHTML(p.short||p.name)}</button></div></div><div class="gantt" id="gantt-${p.id}"></div></div></section>`}
 function renderProjectKPIs(pid){const stats=summaryStats(allTasks().filter(t=>t.project_id===pid)); const prog=pct(projectProgress(pid)); const kpis=[['Pendientes',stats.pendiente,'status-pending'],['En ejecución',stats.ejecucion,'status-running'],['Vencidos',stats.vencido,'status-overdue'],['Terminados',stats.terminado,'status-done'],['Por confirmar',stats.confirmar,'status-confirm'],['Avance',prog+'%','status-summary']]; document.getElementById('kpis-'+pid).innerHTML=kpis.map(c=>`<div class="status-card ${c[2]}"><span>${c[0]}</span><b>${c[1]}</b></div>`).join(''); const pb=document.getElementById('project-progress-bar-'+pid); document.getElementById('project-progress-'+pid).textContent=prog+'%'; pb.style.width=prog+'%'; const st=projectStatus(pid); document.getElementById('project-status-'+pid).innerHTML=statusBadge(st)+' <span class="confirm-note">Estado general derivado de sus actividades.</span>';}
 function projectStatus(pid){const leaves=leafTasks(pid); const st=leaves.map(statusOfLeaf); if(st.every(x=>x==='Terminado'))return 'Terminado'; if(st.includes('Vencido'))return 'Vencido'; if(st.includes('En ejecución'))return 'En ejecución'; return 'Pendiente';}
 function immediateChildren(t){const p=projectById(t.project_id); const prefix=String(t.outline||''); const lvl=Number(t.outline_level)||0; if(!prefix)return []; return p.tasks.filter(x=>x.uid!==t.uid && String(x.outline||'').startsWith(prefix+'.') && Number(x.outline_level||0)===lvl+1);}
@@ -295,21 +424,79 @@ function predecessorLinks(t){const raw=Array.isArray(t.predecessors)?t.predecess
 function dependencyState(t){const links=predecessorLinks(t); const pending=links.filter(l=>!l.task || statusOf(l.task)!=='Terminado'); return {has:links.length>0,links,pending,blocked:links.length>0&&pending.length>0};}
 function isBlockedByDependency(t){return dependencyState(t).blocked;}
 function dependencySearchText(t){const d=dependencyState(t); return [t.predecessor_text,...d.links.map(l=>[l.outline,l.name,l.type,l.lag,l.task?statusOf(l.task):'sin coincidencia'].join(' '))].join(' ');}
-function dependencyBadgeHTML(t){const d=dependencyState(t); if(!d.has)return '<span class="dep-badge free">Sin amarre</span>'; if(d.blocked)return `<span class="dep-badge blocked" title="${escapeAttr('Bloqueado por: '+d.pending.map(x=>x.outline+' '+x.name).join(' | '))}">🔒 Bloqueado</span>`; return '<span class="dep-badge linked">🔗 Amarrado OK</span>';}
+function dependencyBadgeHTML(t){const d=dependencyState(t); if(!d.has)return '<span class="dep-badge free">Sin amarre</span>'; if(d.blocked)return `<span class="dep-badge blocked" title="${escapeAttr('Dependiente de: '+d.pending.map(x=>x.outline+' '+x.name).join(' | '))}">⏳ Dependiente</span>`; return '<span class="dep-badge linked">🔗 Amarrado OK</span>';}
 function dependencyDetailHTML(t,compact=false){const d=dependencyState(t); if(!d.has)return '<span class="dep-badge free">Sin amarre</span>'; const badge=dependencyBadgeHTML(t); if(compact)return badge; const items=d.links.map(l=>{const st=l.task?statusOf(l.task):'No ubicado'; const ok=l.task&&st==='Terminado'; const cls=ok?'ok':'blocked'; const nm=l.task?l.task.name:l.name; const code=l.task?l.task.outline:l.outline; return `<div class="dep-item ${cls}"><b>${escapeHTML(code||'-')} · ${escapeHTML(nm||'Predecesor')}</b><br><span>${escapeHTML(l.type||'Relación')} ${escapeHTML(l.lag||'')} · Estado predecesor: <b>${escapeHTML(st)}</b></span></div>`;}).join(''); return `${badge}<div class="dep-list">${items}</div>`;}
+
+
+function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
+function ganttPointX(t,point,min,total){
+  const s=dateOnly(parseDate(t.start));
+  const f=dateOnly(parseDate(t.finish));
+  const d=(point==='finish'?f:s)||s||f;
+  if(!d)return 0;
+  return clamp((diffDays(min,d)/total)*1000,0,1000);
+}
+function dependencyArrowSVG(pid,tasks,min,total){
+  const rowH=64;
+  const visibleMap=new Map();
+  tasks.forEach((t,i)=>{
+    visibleMap.set(String(t.uid),{t,i});
+    visibleMap.set('u:'+String(t.unique_id),{t,i});
+    visibleMap.set('t:'+String(t.task_id),{t,i});
+    visibleMap.set('o:'+String(t.outline),{t,i});
+  });
+  const paths=[];
+  tasks.forEach((t,i)=>{
+    if(!Array.isArray(t.predecessors) || !t.predecessors.length)return;
+    t.predecessors.forEach((item,idx)=>{
+      const pred=item.predecessor||{};
+      const found = visibleMap.get('u:'+String(pred.unique_id)) || visibleMap.get('t:'+String(pred.task_id)) || visibleMap.get('o:'+String(pred.outline));
+      if(!found)return;
+      const type=String(item.type||'FS').toUpperCase();
+      const fromPoint=(type==='SS'||type==='SF')?'start':'finish';
+      const toPoint=(type==='FF'||type==='SF')?'finish':'start';
+      let x1=ganttPointX(found.t,fromPoint,min,total);
+      let x2=ganttPointX(t,toPoint,min,total);
+      const y1=found.i*rowH+(rowH/2);
+      const y2=i*rowH+(rowH/2);
+      if(!isFinite(x1)||!isFinite(x2)||!isFinite(y1)||!isFinite(y2))return;
+      const offset=(x2>=x1)?18:-18;
+      const mid=x1+offset;
+      const endPad=(x2>=x1)?-4:4;
+      const blocked=dependencyState(t).blocked;
+      const cls=blocked?'gantt-dep-path blocked':'gantt-dep-path';
+      const marker=blocked?`url(#depArrowBlocked-${pid})`:`url(#depArrow-${pid})`;
+      const d=`M ${x1.toFixed(1)} ${y1.toFixed(1)} H ${mid.toFixed(1)} V ${y2.toFixed(1)} H ${(x2+endPad).toFixed(1)}`;
+      paths.push(`<path class="${cls}" d="${d}" marker-end="${marker}"><title>${escapeHTML((found.t.outline||'')+' → '+(t.outline||'')+' · '+(item.type||'FS')+' '+(item.lag||''))}</title></path><circle class="gantt-dep-dot" cx="${x1.toFixed(1)}" cy="${y1.toFixed(1)}" r="2"/>`);
+    });
+  });
+  if(!paths.length)return '';
+  const h=Math.max(rowH,tasks.length*rowH);
+  return `<svg class="gantt-dep-svg" viewBox="0 0 1000 ${h}" preserveAspectRatio="none" aria-hidden="true"><defs><marker id="depArrow-${pid}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,4 L0,8 Z" fill="#64748b" opacity=".65"></path></marker><marker id="depArrowBlocked-${pid}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,4 L0,8 Z" fill="#b91c1c" opacity=".55"></path></marker></defs>${paths.join('')}</svg>`;
+}
+function initializeDefaultCollapsedTree(){
+  if(PAGE_KIND!=='project')return;
+  const marker=TREE_KEY+'_default_grouped_v3_'+PAGE_PROJECT_ID;
+  if(localStorage.getItem(marker))return;
+  activeProjects().forEach(p=>{
+    p.tasks.filter(hasTreeChildren).forEach(t=>{collapsedTree[t.uid]=true;});
+  });
+  saveTreeState();
+  localStorage.setItem(marker,'1');
+}
 
 function hierarchyKind(t){if(!t.is_summary)return 'Actividad'; const lvl=outlineDepth(t); if(lvl<=2)return 'Grupo principal'; return 'Subgrupo';}
 function hierarchyChipClass(t){if(!t.is_summary)return 'activity'; const lvl=outlineDepth(t); return lvl<=2?'group-main':'group-sub';}
 function descendantLeafCount(t){return t.is_summary?descendants(t,true).length:0;}
 function ganttRowClass(t,isContext=false){const lvl=outlineDepth(t); const base=t.is_summary?(lvl<=2?'gantt-group-main':lvl<=4?'gantt-group-sub':'gantt-group-minor'):'gantt-activity'; return base+(isContext?' gantt-context':'')+(isCollapsedNode(t)?' is-collapsed':'')+(isBlockedByDependency(t)?' gantt-blocked':'');}
 function rowGroupClass(t,isContext=false){const lvl=Math.min(8,outlineDepth(t)); return (t.is_summary?'table-group-row':'table-activity-row')+' level-'+lvl+(isContext?' table-context-row':'')+(isCollapsedNode(t)?' is-collapsed':'')+(isBlockedByDependency(t)?' table-blocked':'');}
-function renderGantt(pid){const p=projectById(pid); const all=displayTasks(pid); const tasks=visibleTreeTasks(pid); const dates=all.flatMap(t=>[parseDate(t.start),parseDate(t.finish)]).filter(Boolean); if(!dates.length){document.getElementById('gantt-'+pid).innerHTML='<div class="gantt-inner">Sin fechas para mostrar.</div>'; return;} const min=dateOnly(new Date(Math.min(...dates.map(d=>d.getTime())))); const max=dateOnly(new Date(Math.max(...dates.map(d=>d.getTime())))); const total=Math.max(1,diffDays(min,max)+1); const todayPos=Math.max(0,Math.min(100,(diffDays(min,controlDate())/total)*100)); const groups=all.filter(t=>t.is_summary).length; const acts=all.filter(t=>!t.is_summary).length; const linked=all.filter(t=>dependencyState(t).has).length; const blocked=all.filter(t=>dependencyState(t).blocked).length; const rows=tasks.map(t=>ganttRowHTML(t,min,total,false)).join(''); document.getElementById('gantt-'+pid).innerHTML=`<div class="gantt-inner"><div class="gantt-scale"><span>Desglose Project plegable</span><span>${isoToDMY(p.start)} — ${isoToDMY(p.finish)} · línea roja = fecha de control</span></div><div class="gantt-hierarchy-controls"><small><b>${tasks.length}</b> visibles de <b>${all.length}</b> registros. Total: <b>${groups}</b> grupos/subgrupos y <b>${acts}</b> actividades.</small><small><span class="hierarchy-chip group-main">Grupo principal</span> <span class="hierarchy-chip group-sub">Subgrupo</span> <span class="hierarchy-chip activity">Actividad</span> <span class="dep-badge linked">🔗 ${linked} amarradas</span> <span class="dep-badge blocked">🔒 ${blocked} bloqueadas</span></small></div><div class="gantt-tree-wrap" style="--today-pos:${todayPos}%"><span class="today-line"></span>${rows}</div></div>`;}
-function ganttRowHTML(t,min,total,isContext){const s=dateOnly(parseDate(t.start)), f=dateOnly(parseDate(t.finish)); const left=s?Math.max(0,Math.min(100,(diffDays(min,s)/total)*100)):0; const width=(s&&f)?Math.max(.45,Math.min(100-left,((diffDays(s,f)+1)/total)*100)):.5; const st=statusOf(t); const lvl=Math.min(8,Math.max(1,outlineDepth(t))); const indent=Math.max(0,(lvl-1)*16); const pr=pct(autoProgress(t)); const count=descendantLeafCount(t); const dep=dependencyState(t); const sub=t.is_summary?`${count} actividades · ${pr}% automático · ${st}`:`${isoToDMY(t.start)} - ${isoToDMY(t.finish)} · ${pr}% automático · ${st}`; const depText=dep.has?(dep.blocked?' · Bloqueado por predecesor':' · Amarrado OK'):''; return `<div class="gantt-row ${ganttRowClass(t,isContext)} level-${lvl}"><div class="gantt-label" title="${escapeAttr(t.name)}" style="padding-left:${indent}px">${treeToggleHTML(t,t.project_id)}<span class="gantt-level">N${lvl}</span><span class="outline">${escapeHTML(t.outline)}</span><span class="hierarchy-chip ${hierarchyChipClass(t)}">${hierarchyKind(t)}</span><span class="gantt-label-text"><span class="gantt-label-title">${escapeHTML(t.name)}</span><span class="gantt-label-sub">${escapeHTML(sub+depText)}${t.critical?' · Ruta crítica':''}</span><span class="dependency-summary">${dependencyDetailHTML(t,true)}</span></span></div><div class="gantt-track"><span class="gantt-bar ${t.is_summary?'summary':statusClass(st)}" style="left:${left}%;width:${width}%" title="${escapeAttr(st+' · '+isoToDMY(t.start)+' - '+isoToDMY(t.finish)+' · '+(t.predecessor_text||'Sin predecesor'))}"></span></div></div>`;}
+function renderGantt(pid){const p=projectById(pid); const all=displayTasks(pid); const tasks=visibleTreeTasks(pid); const dates=all.flatMap(t=>[parseDate(t.start),parseDate(t.finish)]).filter(Boolean); if(!dates.length){document.getElementById('gantt-'+pid).innerHTML='<div class="gantt-inner">Sin fechas para mostrar.</div>'; return;} const min=dateOnly(new Date(Math.min(...dates.map(d=>d.getTime())))); const max=dateOnly(new Date(Math.max(...dates.map(d=>d.getTime())))); const total=Math.max(1,diffDays(min,max)+1); const todayPos=Math.max(0,Math.min(100,(diffDays(min,controlDate())/total)*100)); const groups=all.filter(t=>t.is_summary).length; const acts=all.filter(t=>!t.is_summary).length; const linked=all.filter(t=>dependencyState(t).has).length; const blocked=all.filter(t=>dependencyState(t).blocked).length; const rows=tasks.map(t=>ganttRowHTML(t,min,total,false)).join(''); const arrows=dependencyArrowSVG(pid,tasks,min,total); document.getElementById('gantt-'+pid).innerHTML=`<div class="gantt-inner"><div class="gantt-scale"><span>Gantt Project plegable</span><span>${isoToDMY(p.start)} — ${isoToDMY(p.finish)} · línea roja = fecha de control</span></div><div class="gantt-hierarchy-controls"><small><b>${tasks.length}</b> visibles de <b>${all.length}</b> registros. Total: <b>${groups}</b> grupos/subgrupos y <b>${acts}</b> actividades.</small><small><span class="hierarchy-chip group-main">Grupo principal</span> <span class="hierarchy-chip group-sub">Subgrupo</span> <span class="hierarchy-chip activity">Actividad</span> <span class="dep-badge linked">↘ ${linked} amarradas</span> <span class="dep-badge blocked">⏳ ${blocked} dependientes</span></small></div><div class="gantt-tree-wrap" style="--today-pos:${todayPos}%"><span class="today-line"></span>${rows}${arrows}</div></div>`;}
+function ganttRowHTML(t,min,total,isContext){const s=dateOnly(parseDate(t.start)), f=dateOnly(parseDate(t.finish)); const left=s?Math.max(0,Math.min(100,(diffDays(min,s)/total)*100)):0; const width=(s&&f)?Math.max(.45,Math.min(100-left,((diffDays(s,f)+1)/total)*100)):.5; const st=statusOf(t); const lvl=Math.min(8,Math.max(1,outlineDepth(t))); const indent=Math.max(0,(lvl-1)*16); const pr=pct(autoProgress(t)); const count=descendantLeafCount(t); const dep=dependencyState(t); const sub=t.is_summary?`${count} actividades · ${pr}% automático · ${st}`:`${isoToDMY(t.start)} - ${isoToDMY(t.finish)} · ${pr}% automático · ${st}`; const depText=dep.has?(dep.blocked?' · Dependiente de predecesor':' · Amarrado OK'):''; return `<div class="gantt-row ${ganttRowClass(t,isContext)} level-${lvl}"><div class="gantt-label" title="${escapeAttr(t.name)}" style="padding-left:${indent}px">${treeToggleHTML(t,t.project_id)}<span class="gantt-level">N${lvl}</span><span class="outline">${escapeHTML(t.outline)}</span><span class="hierarchy-chip ${hierarchyChipClass(t)}">${hierarchyKind(t)}</span><span class="gantt-label-text"><span class="gantt-label-title">${escapeHTML(t.name)}</span><span class="gantt-label-sub">${escapeHTML(sub+depText)}${t.critical?' · Ruta crítica':''}</span><span class="dependency-summary">${dependencyDetailHTML(t,true)}</span></span></div><div class="gantt-track"><span class="gantt-bar ${t.is_summary?'summary':statusClass(st)}" style="left:${left}%;width:${width}%" title="${escapeAttr(st+' · '+isoToDMY(t.start)+' - '+isoToDMY(t.finish)+' · '+(t.predecessor_text||'Sin predecesor'))}"></span></div></div>`;}
 function tableMatches(t,q,fs,ft,fc,fd){const st=statusOf(t); const ds=dependencyState(t); if(activeStatus!=='all' && st!==activeStatus)return false; if(fs!=='all' && st!==fs)return false; if(ft==='summary' && !t.is_summary)return false; if(ft==='task' && t.is_summary)return false; if(fc==='critical' && !t.critical)return false; if(fc==='noncritical' && t.critical)return false; if(fd==='linked' && !ds.has)return false; if(fd==='blocked' && !ds.blocked)return false; if(fd==='free' && ds.has)return false; const m=meta[t.uid]||{}; if(q){const hay=[t.name,t.outline,t.resource_names,t.responsible,m.owner,m.notes,t.predecessor_text,dependencySearchText(t),hierarchyKind(t)].join(' ').toLowerCase(); if(!hay.includes(q))return false;} return true;}
-function renderTable(pid){const tbody=document.querySelector('#table-'+pid+' tbody'); if(!tbody)return; const q=(document.getElementById('search-'+pid)?.value||'').toLowerCase().trim(); const fs=document.getElementById('filter-status-'+pid)?.value||'all'; const ft=document.getElementById('filter-type-'+pid)?.value||'all'; const fc=document.getElementById('filter-critical-'+pid)?.value||'all'; const fd=document.getElementById('filter-dependency-'+pid)?.value||'all'; const all=displayTasks(pid); const filterActive=q||fs!=='all'||ft!=='all'||fc!=='all'||fd!=='all'||activeStatus!=='all'; let include=new Set(), direct=new Set(); all.forEach(t=>{if(tableMatches(t,q,fs,ft,fc,fd)){include.add(t.uid); direct.add(t.uid); if(filterActive)ancestorTasks(t).forEach(a=>include.add(a.uid));}}); if(!filterActive){include=new Set(all.map(t=>t.uid)); direct=new Set(all.map(t=>t.uid));} const rows=all.filter(t=>include.has(t.uid) && (filterActive || !hiddenByCollapsedAncestor(t))); tbody.innerHTML=rows.map(t=>rowHTML(t,!direct.has(t.uid))).join('') || `<tr><td colspan="10">No hay registros con los filtros aplicados.</td></tr>`; const hint=document.getElementById('table-hint-'+pid); if(hint){const grupos=rows.filter(t=>t.is_summary).length; const acts=rows.filter(t=>!t.is_summary).length; const linked=rows.filter(t=>dependencyState(t).has).length; const blocked=rows.filter(t=>dependencyState(t).blocked).length; hint.innerHTML=`<span class="hierarchy-chip group-main">Grupo principal</span><span class="hierarchy-chip group-sub">Subgrupo</span><span class="hierarchy-chip activity">Actividad</span>${filterActive?'<span class="hierarchy-chip context">Contexto por filtro</span>':''}<span class="dep-badge linked">🔗 ${linked} amarradas</span><span class="dep-badge blocked">🔒 ${blocked} bloqueadas</span><span>Mostrando <b>${rows.length}</b> registros: <b>${grupos}</b> grupos/subgrupos y <b>${acts}</b> actividades.</span>`;}}
-function rowHTML(t,isContext=false){const st=statusOf(t); const pr=autoProgress(t); const m=meta[t.uid]||{}; const conf=isConfirmed(t); const dep=dependencyState(t); const lvl=Math.min(8,Math.max(1,outlineDepth(t))); const indent=Math.max(0,(lvl-1)*18); const count=descendantLeafCount(t); const action=t.is_summary?`<span class="confirm-note">Derivado de ${count} actividades</span>`: conf?`<span class="badge done">Confirmado</span><div class="confirm-note">${escapeHTML(confirmations[t.uid].date||'')}</div><button class="btn small" onclick="undoConfirm('${t.uid}')">Quitar</button>`: dep.blocked?`<span class="dep-badge blocked">🔒 Bloqueado</span><div class="confirm-note">Primero debe terminarse el proceso predecesor.</div>`: canConfirm(t)?`<button class="btn small green" onclick="openConfirm('${t.uid}')">Confirmar terminado</button><div class="confirm-note">Llegó a 100%; seguirá como vencido hasta confirmar.</div>`:`<span class="confirm-note">No disponible hasta llegar a 100%</span>`; const context=isContext?'<span class="hierarchy-chip context">Contexto</span>':''; const ownerDefault=(m.owner!==undefined&&m.owner!==null)?m.owner:(t.responsible||t.resource_names||''); return `<tr class="${rowGroupClass(t,isContext)}"><td><div class="code-cell">${treeToggleHTML(t,t.project_id)}<span class="outline">${escapeHTML(t.outline)}</span></div><div class="table-level">Nivel ${lvl}</div></td><td class="name-cell"><div class="tree-name" style="padding-left:${indent}px">${lvl>1?'<span class="tree-connector"></span>':''}<div class="tree-name-main"><b>${escapeHTML(t.name)}</b><div class="confirm-note"><span class="hierarchy-chip ${hierarchyChipClass(t)}">${hierarchyKind(t)}</span>${context}${t.critical?' <span class="badge overdue">Ruta crítica</span>':''}${t.is_summary?` <span class="badge running">${count} actividades</span>`:''}</div></div></div></td><td>${isoToDMY(t.start)}</td><td>${isoToDMY(t.finish)}</td><td>${escapeHTML(t.duration_text||'')}</td><td><div class="progress ${progressClass(st)}"><i style="width:${pct(pr)}%"></i></div><span class="progress-number">${pct(pr)}%</span></td><td>${statusBadge(st)}</td><td>${dependencyDetailHTML(t,false)}</td><td>${action}</td><td><div class="field"><input placeholder="Responsable" value="${escapeAttr(ownerDefault)}" onchange="setMeta('${t.uid}','owner',this.value)"></div><div class="field" style="margin-top:6px"><textarea rows="2" placeholder="Notas" onchange="setMeta('${t.uid}','notes',this.value)">${escapeHTML(m.notes||'')}</textarea></div></td></tr>`;}
+function renderTable(pid){const tbody=document.querySelector('#table-'+pid+' tbody'); if(!tbody)return; const q=(document.getElementById('search-'+pid)?.value||'').toLowerCase().trim(); const fs=document.getElementById('filter-status-'+pid)?.value||'all'; const ft=document.getElementById('filter-type-'+pid)?.value||'all'; const fc=document.getElementById('filter-critical-'+pid)?.value||'all'; const fd=document.getElementById('filter-dependency-'+pid)?.value||'all'; const all=displayTasks(pid); const filterActive=q||fs!=='all'||ft!=='all'||fc!=='all'||fd!=='all'||activeStatus!=='all'; let include=new Set(), direct=new Set(); all.forEach(t=>{if(tableMatches(t,q,fs,ft,fc,fd)){include.add(t.uid); direct.add(t.uid); if(filterActive)ancestorTasks(t).forEach(a=>include.add(a.uid));}}); if(!filterActive){include=new Set(all.map(t=>t.uid)); direct=new Set(all.map(t=>t.uid));} const rows=all.filter(t=>include.has(t.uid) && (filterActive || !hiddenByCollapsedAncestor(t))); tbody.innerHTML=rows.map(t=>rowHTML(t,!direct.has(t.uid))).join('') || `<tr><td colspan="10">No hay registros con los filtros aplicados.</td></tr>`; const hint=document.getElementById('table-hint-'+pid); if(hint){const grupos=rows.filter(t=>t.is_summary).length; const acts=rows.filter(t=>!t.is_summary).length; const linked=rows.filter(t=>dependencyState(t).has).length; const blocked=rows.filter(t=>dependencyState(t).blocked).length; hint.innerHTML=`<span class="hierarchy-chip group-main">Grupo principal</span><span class="hierarchy-chip group-sub">Subgrupo</span><span class="hierarchy-chip activity">Actividad</span>${filterActive?'<span class="hierarchy-chip context">Contexto por filtro</span>':''}<span class="dep-badge linked">🔗 ${linked} amarradas</span><span class="dep-badge blocked">⏳ ${blocked} dependientes</span><span>Mostrando <b>${rows.length}</b> registros: <b>${grupos}</b> grupos/subgrupos y <b>${acts}</b> actividades.</span>`;}}
+function rowHTML(t,isContext=false){const st=statusOf(t); const pr=autoProgress(t); const m=meta[t.uid]||{}; const conf=isConfirmed(t); const dep=dependencyState(t); const lvl=Math.min(8,Math.max(1,outlineDepth(t))); const indent=Math.max(0,(lvl-1)*18); const count=descendantLeafCount(t); const action=t.is_summary?`<span class="confirm-note">Derivado de ${count} actividades</span>`: conf?`<span class="badge done">Confirmado</span><div class="confirm-note">${escapeHTML(confirmations[t.uid].date||'')}</div><button class="btn small" onclick="undoConfirm('${t.uid}')">Quitar</button>`: dep.blocked?`<span class="dep-badge blocked">⏳ Dependiente</span><div class="confirm-note">En espera de que se confirme el proceso predecesor.</div>`: canConfirm(t)?`<button class="btn small green" onclick="openConfirm('${t.uid}')">Confirmar terminado</button><div class="confirm-note">Llegó a 100%; seguirá como vencido hasta confirmar.</div>`:`<span class="confirm-note">Disponible cuando llegue a 100% por fecha</span>`; const context=isContext?'<span class="hierarchy-chip context">Contexto</span>':''; const ownerDefault=(m.owner!==undefined&&m.owner!==null)?m.owner:(t.responsible||t.resource_names||''); return `<tr class="${rowGroupClass(t,isContext)}"><td><div class="code-cell">${treeToggleHTML(t,t.project_id)}<span class="outline">${escapeHTML(t.outline)}</span></div><div class="table-level">Nivel ${lvl}</div></td><td class="name-cell"><div class="tree-name" style="padding-left:${indent}px">${lvl>1?'<span class="tree-connector"></span>':''}<div class="tree-name-main"><b>${escapeHTML(t.name)}</b><div class="confirm-note"><span class="hierarchy-chip ${hierarchyChipClass(t)}">${hierarchyKind(t)}</span>${context}${t.critical?' <span class="badge overdue">Ruta crítica</span>':''}${t.is_summary?` <span class="badge running">${count} actividades</span>`:''}</div></div></div></td><td>${isoToDMY(t.start)}</td><td>${isoToDMY(t.finish)}</td><td>${escapeHTML(t.duration_text||'')}</td><td><div class="progress ${progressClass(st)}"><i style="width:${pct(pr)}%"></i></div><span class="progress-number">${pct(pr)}%</span></td><td>${statusBadge(st)}</td><td>${dependencyDetailHTML(t,false)}</td><td>${action}</td><td><div class="field"><input placeholder="Responsable" value="${escapeAttr(ownerDefault)}" onchange="setMeta('${t.uid}','owner',this.value)"></div><div class="field" style="margin-top:6px"><textarea rows="2" placeholder="Notas" onchange="setMeta('${t.uid}','notes',this.value)">${escapeHTML(m.notes||'')}</textarea></div></td></tr>`;}
 async function setMeta(uid,key,val){meta[uid]=meta[uid]||{}; meta[uid][key]=val; saveMeta(); await saveMetaToSupabase(uid,meta[uid]); renderAlertsPanel();}
-function openConfirm(uid){const t=allTasks().find(x=>x.uid===uid); if(!t)return; const dep=dependencyState(t); if(dep.blocked){showToast('No se puede confirmar todavía: esta actividad está amarrada a un proceso anterior que no figura como terminado.'); return;} currentConfirmUid=uid; document.getElementById('confirm-subtitle').textContent=(t.project_short||t.project_name)+' · '+t.outline+' · '+isoToDMY(t.start)+' - '+isoToDMY(t.finish); document.getElementById('confirm-body').innerHTML=`<p><b>${escapeHTML(t.name)}</b></p><p>Esta actividad ya llegó al <b>100%</b> según el cronograma. Para que deje de figurar como <b>Vencido</b> y pase a <b>Terminado</b>, confirma que realmente fue ejecutada.</p><div class="field"><label>Amarre Project</label>${dependencyDetailHTML(t,false)}</div><div class="field" style="margin-top:10px"><label>Observación de cierre</label><textarea id="confirm-note" rows="3" placeholder="Ejemplo: culminado en campo y validado por supervisión"></textarea></div>`; document.getElementById('confirm-action').onclick=confirmCurrent; document.getElementById('confirm-modal').classList.add('show');}
+function openConfirm(uid){const t=allTasks().find(x=>x.uid===uid); if(!t)return; const dep=dependencyState(t); if(dep.blocked){showToast('No se puede confirmar todavía: esta actividad depende de un proceso anterior que aún no figura como terminado.'); return;} currentConfirmUid=uid; document.getElementById('confirm-subtitle').textContent=(t.project_short||t.project_name)+' · '+t.outline+' · '+isoToDMY(t.start)+' - '+isoToDMY(t.finish); document.getElementById('confirm-body').innerHTML=`<p><b>${escapeHTML(t.name)}</b></p><p>Esta actividad ya llegó al <b>100%</b> según el cronograma. Para que deje de figurar como <b>Vencido</b> y pase a <b>Terminado</b>, confirma que realmente fue ejecutada.</p><div class="field"><label>Amarre Project</label>${dependencyDetailHTML(t,false)}</div><div class="field" style="margin-top:10px"><label>Observación de cierre</label><textarea id="confirm-note" rows="3" placeholder="Ejemplo: culminado en campo y validado por supervisión"></textarea></div>`; document.getElementById('confirm-action').onclick=confirmCurrent; document.getElementById('confirm-modal').classList.add('show');}
 function closeConfirmModal(){document.getElementById('confirm-modal').classList.remove('show'); currentConfirmUid=null;}
 async function confirmCurrent(){if(!currentConfirmUid)return; const note=document.getElementById('confirm-note')?.value||''; const saved=await saveConfirmationToSupabase(currentConfirmUid,note); if(!saved)return; confirmations[currentConfirmUid]={date:dmyFromDate(new Date()),controlDate:isoToDMY(currentDateISO()),note}; if(note){meta[currentConfirmUid]=meta[currentConfirmUid]||{}; meta[currentConfirmUid].notes=((meta[currentConfirmUid].notes||'')+'\nCierre: '+note).trim(); saveMeta(); await saveMetaToSupabase(currentConfirmUid,meta[currentConfirmUid]);} saveConfirmations(); closeConfirmModal(); renderAll(); showToast('Actividad confirmada como terminada y sincronizada en Supabase.');}
 async function undoConfirm(uid){if(confirm('¿Quitar confirmación de terminado? La actividad volverá al estado automático según la fecha.')){const deleted=await deleteConfirmationFromSupabase(uid); if(!deleted)return; delete confirmations[uid]; saveConfirmations(); renderAll();}}
@@ -323,7 +510,40 @@ function showOpeningAlerts(force){const overdue=leafTasks().filter(t=>statusOfLe
 function showToast(msg){document.getElementById('toast-body').innerHTML='<p>'+escapeHTML(msg)+'</p>'; document.getElementById('toast').classList.add('show'); setTimeout(hideToast,3000);}
 function hideToast(){document.getElementById('toast').classList.remove('show');}
 function sortByDate(a,b){return String(a.start).localeCompare(String(b.start)) || String(a.outline).localeCompare(String(b.outline),undefined,{numeric:true});}
-function exportExcel(pid){const rows=(pid?projectById(pid).tasks:allTasks()).map(t=>{const m=meta[t.uid]||{}; const conf=confirmations[t.uid]||{}; const dep=dependencyState(t); return {Proyecto:(t.project_short||t.project_name),NombreProyecto:t.project_name,Codigo:t.outline,Tipo:t.is_summary?'Fase / resumen':'Actividad',Actividad:t.name,Inicio:isoToDMY(t.start),Fin:isoToDMY(t.finish),Duracion:t.duration_text||'',AvanceAutomatico:pct(autoProgress(t))+'%',Estado:statusOf(t),Amarrada:dep.has?'Sí':'No',BloqueadaPorPredecesor:dep.blocked?'Sí':'No',Predecesores:t.predecessor_text||dependencySearchText(t)||'',Confirmado:isConfirmed(t)?'Sí':'No',FechaConfirmacion:conf.date||'',Responsable:((m.owner!==undefined&&m.owner!==null)?m.owner:(t.responsible||t.resource_names||'')),Notas:m.notes||'',RutaCritica:t.critical?'Sí':'No'};}); const title='Seguimiento ZC Piura '+(pid?projectById(pid).short:'Unificado')+' - '+isoToDMY(currentDateISO()); let html='<html><head><meta charset="utf-8"><style>table{border-collapse:collapse}td,th{border:1px solid #d0d7de;padding:6px}th{background:#dbeafe}</style></head><body>'; html+='<h2>'+escapeHTML(title)+'</h2><p>Exportado desde documento HTML único. Fecha de control: '+escapeHTML(isoToDMY(currentDateISO()))+'</p><table><thead><tr>'+Object.keys(rows[0]||{Proyecto:''}).map(h=>'<th>'+escapeHTML(h)+'</th>').join('')+'</tr></thead><tbody>'; rows.forEach(r=>{html+='<tr>'+Object.values(r).map(v=>'<td>'+escapeHTML(String(v)).replace(/\n/g,'<br>')+'</td>').join('')+'</tr>';}); html+='</tbody></table></body></html>'; const blob=new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8'}); downloadBlob('seguimiento_zc_piura_'+(pid||'unificado')+'_'+currentDateISO()+'.xls',blob);}
+function exportExcel(pid){
+  const rows=(pid?projectById(pid).tasks:allTasks()).map(t=>{
+    const m=meta[t.uid]||{};
+    const conf=confirmations[t.uid]||{};
+    const dep=dependencyState(t);
+    return {
+      Proyecto:(t.project_short||t.project_name),
+      NombreProyecto:t.project_name,
+      Codigo:t.outline,
+      Tipo:t.is_summary?'Fase / resumen':'Actividad',
+      Actividad:t.name,
+      Inicio:isoToDMY(t.start),
+      Fin:isoToDMY(t.finish),
+      Duracion:t.duration_text||'',
+      AvanceAutomatico:pct(autoProgress(t))+'%',
+      Estado:statusOf(t),
+      Amarrada:dep.has?'Si':'No',
+      DependientePorPredecesor:dep.blocked?'Si':'No',
+      Predecesores:t.predecessor_text||dependencySearchText(t)||'',
+      Confirmado:isConfirmed(t)?'Si':'No',
+      FechaConfirmacion:conf.date||'',
+      Responsable:((m.owner!==undefined&&m.owner!==null)?m.owner:(t.responsible||t.resource_names||'')),
+      Notas:m.notes||'',
+      RutaCritica:t.critical?'Si':'No'
+    };
+  });
+  const title='Seguimiento ZC Piura '+(pid?projectById(pid).short:'Unificado')+' - '+isoToDMY(currentDateISO());
+  const headers=Object.keys(rows[0]||{Proyecto:''});
+  const tableHead=headers.map(h=>'<th>'+escapeHTML(h)+'</th>').join('');
+  const tableBody=rows.map(r=>'<tr>'+headers.map(h=>'<td>'+escapeHTML(String(r[h]??'')).replace(/\n/g,'<br>')+'</td>').join('')+'</tr>').join('');
+  const html=`<html><head><meta charset="utf-8"><style>table{border-collapse:collapse}td,th{border:1px solid #d0d7de;padding:6px}th{background:#dbeafe}</style></head><body><h2>${escapeHTML(title)}</h2><p>Exportado desde la plataforma de seguimiento ZC Piura. Fecha de control: ${escapeHTML(isoToDMY(currentDateISO()))}</p><table><thead><tr>${tableHead}</tr></thead><tbody>${tableBody}</tbody></table></body></html>`;
+  const blob=new Blob(['\\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8'});
+  downloadBlob('seguimiento_zc_piura_'+(pid||'unificado')+'_'+currentDateISO()+'.xls',blob);
+}
 function downloadBlob(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
 function escapeHTML(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function escapeAttr(s){return escapeHTML(s).replace(/\n/g,' ');}
@@ -398,12 +618,139 @@ closeConfirmModal = function(){
 };
 rowHTML = function(t,isContext=false){
   const st=statusOf(t); const pr=autoProgress(t); const m=meta[t.uid]||{}; const conf=isConfirmed(t); const dep=dependencyState(t); const lvl=Math.min(8,Math.max(1,outlineDepth(t))); const indent=Math.max(0,(lvl-1)*18); const count=descendantLeafCount(t);
-  const action=t.is_summary?groupActionHTML(t): conf?`<span class="badge done">Confirmado</span><div class="confirm-note">${escapeHTML(confirmations[t.uid].date||'')}</div><button class="btn small" onclick="undoConfirm('${t.uid}')">Quitar</button>`: dep.blocked?`<span class="dep-badge blocked">Bloqueado</span><div class="confirm-note">Primero debe terminarse el proceso predecesor.</div>`: canConfirm(t)?`<button class="btn small green" onclick="openConfirm('${t.uid}')">Confirmar terminado</button><div class="confirm-note">Llegó a 100%; seguirá como vencido hasta confirmar.</div>`:`<span class="confirm-note">No disponible hasta llegar a 100%</span>`;
+  const action=t.is_summary?groupActionHTML(t): conf?`<span class="badge done">Confirmado</span><div class="confirm-note">${escapeHTML(confirmations[t.uid].date||'')}</div><button class="btn small" onclick="undoConfirm('${t.uid}')">Quitar</button>`: dep.blocked?`<span class="dep-badge blocked">Dependiente</span><div class="confirm-note">En espera de que se confirme el proceso predecesor.</div>`: canConfirm(t)?`<button class="btn small green" onclick="openConfirm('${t.uid}')">Confirmar terminado</button><div class="confirm-note">Llegó a 100%; seguirá como vencido hasta confirmar.</div>`:`<span class="confirm-note">Disponible cuando llegue a 100% por fecha</span>`;
   const context=isContext?'<span class="hierarchy-chip context">Contexto</span>':''; const ownerDefault=(m.owner!==undefined&&m.owner!==null)?m.owner:(t.responsible||t.resource_names||'');
   return `<tr class="${rowGroupClass(t,isContext)}"><td><div class="code-cell">${treeToggleHTML(t,t.project_id)}<span class="outline">${escapeHTML(t.outline)}</span></div><div class="table-level">Nivel ${lvl}</div></td><td class="name-cell"><div class="tree-name" style="padding-left:${indent}px">${lvl>1?'<span class="tree-connector"></span>':''}<div class="tree-name-main"><b>${escapeHTML(t.name)}</b><div class="confirm-note"><span class="hierarchy-chip ${hierarchyChipClass(t)}">${hierarchyKind(t)}</span>${context}${t.critical?' <span class="badge overdue">Ruta crítica</span>':''}${t.is_summary?` <span class="badge running">${count} actividades</span>`:''}</div></div></div></td><td>${isoToDMY(t.start)}</td><td>${isoToDMY(t.finish)}</td><td>${escapeHTML(t.duration_text||'')}</td><td><div class="progress ${progressClass(st)}"><i style="width:${pct(pr)}%"></i></div><span class="progress-number">${pct(pr)}%</span></td><td>${statusBadge(st)}</td><td>${dependencyDetailHTML(t,false)}</td><td>${action}</td><td><div class="field"><input placeholder="Responsable" value="${escapeAttr(ownerDefault)}" onchange="setMeta('${t.uid}','owner',this.value)"></div><div class="field" style="margin-top:6px"><textarea rows="2" placeholder="Notas" onchange="setMeta('${t.uid}','notes',this.value)">${escapeHTML(m.notes||'')}</textarea></div></td></tr>`;
 };
 
-window.addEventListener('DOMContentLoaded',async()=>{ if(dateConfig.mode==='auto'){dateConfig.manualDate=dateConfig.manualDate||'2026-06-17';} await loadConfirmationsFromSupabase(); await loadMetaFromSupabase(); renderAll(); setTimeout(()=>showOpeningAlerts(false),500); });
+
+// ===== Ajustes finales: tabla y Gantt con plegado independiente =====
+var TABLE_TREE_KEY_FINAL = 'zc_piura_tree_table_v1';
+var GANTT_TREE_KEY_FINAL = 'zc_piura_tree_gantt_v1';
+var tableCollapsedTree = safeJSON(localStorage.getItem(TABLE_TREE_KEY_FINAL),{});
+var ganttCollapsedTree = safeJSON(localStorage.getItem(GANTT_TREE_KEY_FINAL),{});
+function treeStore(area){return area==='gantt'?ganttCollapsedTree:tableCollapsedTree;}
+function saveTreeStateFinal(area){localStorage.setItem(area==='gantt'?GANTT_TREE_KEY_FINAL:TABLE_TREE_KEY_FINAL,JSON.stringify(treeStore(area)));}
+function isCollapsedNode(t,area='table'){return !!treeStore(area)[t.uid];}
+function hiddenByCollapsedAncestor(t,area='table'){return ancestorTasks(t).some(a=>isCollapsedNode(a,area));}
+function treeToggleHTML(t,pid,area='table'){
+  if(!hasTreeChildren(t))return '<span class="tree-toggle-spacer"></span>';
+  const collapsed=isCollapsedNode(t,area);
+  const label=area==='gantt'?'Gantt':'Tabla';
+  return `<button type="button" class="tree-toggle ${collapsed?'collapsed':''}" onclick="toggleTreeNode(event,'${pid}','${t.uid}','${area}')" title="${collapsed?'Desglosar':'Agrupar'} en ${label}">${collapsed?'▸':'▾'}</button>`;
+}
+function toggleTreeNode(ev,pid,uid,area='table'){
+  if(ev)ev.stopPropagation();
+  const store=treeStore(area);
+  if(store[uid])delete store[uid]; else store[uid]=true;
+  saveTreeStateFinal(area);
+  if(area==='gantt')renderGantt(pid); else renderTable(pid);
+}
+function setProjectTree(pid,collapsed,area='table'){
+  const store=treeStore(area);
+  projectById(pid).tasks.filter(hasTreeChildren).forEach(t=>{if(collapsed)store[t.uid]=true; else delete store[t.uid];});
+  saveTreeStateFinal(area);
+  if(area==='gantt')renderGantt(pid); else renderTable(pid);
+}
+function visibleTreeTasks(pid){return displayTasks(pid).filter(t=>!hiddenByCollapsedAncestor(t,'gantt'));}
+function initializeDefaultCollapsedTree(){
+  if(PAGE_KIND!=='project')return;
+  const marker='zc_piura_default_grouped_separate_v1_'+PAGE_PROJECT_ID;
+  if(localStorage.getItem(marker))return;
+  activeProjects().forEach(p=>{
+    p.tasks.filter(hasTreeChildren).forEach(t=>{tableCollapsedTree[t.uid]=true; ganttCollapsedTree[t.uid]=true;});
+  });
+  saveTreeStateFinal('table');
+  saveTreeStateFinal('gantt');
+  localStorage.setItem(marker,'1');
+}
+function ganttRowClass(t,isContext=false){const lvl=outlineDepth(t); const base=t.is_summary?(lvl<=2?'gantt-group-main':lvl<=4?'gantt-group-sub':'gantt-group-minor'):'gantt-activity'; return base+(isContext?' gantt-context':'')+(isCollapsedNode(t,'gantt')?' is-collapsed':'')+(isBlockedByDependency(t)?' gantt-blocked':'');}
+function rowGroupClass(t,isContext=false){const lvl=Math.min(8,outlineDepth(t)); return (t.is_summary?'table-group-row':'table-activity-row')+' level-'+lvl+(isContext?' table-context-row':'')+(isCollapsedNode(t,'table')?' is-collapsed':'')+(isBlockedByDependency(t)?' table-blocked':'');}
+function projectHTML(p){return `<section id="p-${p.id}" style="scroll-margin-top:20px;margin-bottom:28px"><div class="project-header"><div class="project-card"><span class="eyebrow">${escapeHTML(p.short||p.name)}</span><h2>${escapeHTML(p.name)}</h2><p>${escapeHTML(p.description||'Cronograma de ejecución de obra')}</p><div class="meta"><span class="badge summary">${escapeHTML(p.source_file||'Archivo .mpp')}</span><span class="badge pending">${isoToDMY(p.start)} - ${isoToDMY(p.finish)}</span><span class="badge done">${p.tasks.length} registros</span><span class="badge running">${p.verification.activities_total} actividades</span></div></div><div class="project-card"><h3>Avance del proyecto</h3><strong style="font-size:42px" id="project-progress-${p.id}">0%</strong><div class="progress" style="margin-top:10px"><i id="project-progress-bar-${p.id}"></i></div><p id="project-status-${p.id}"></p></div></div><div class="kpi-row" id="kpis-${p.id}" style="margin-top:14px"></div><div class="section" style="box-shadow:none;margin-top:16px;padding:16px"><div class="section-head"><div><h3>Tabla de seguimiento · ${escapeHTML(p.short||p.name)}</h3><p>La tabla inicia agrupada. Sus flechas son independientes del Gantt: si abres o cierras la tabla, el Gantt no cambia.</p></div><div class="table-actions"><button class="btn small" onclick="setProjectTree('${p.id}',false,'table')">Expandir tabla</button><button class="btn small" onclick="setProjectTree('${p.id}',true,'table')">Contraer tabla</button><button class="btn small" onclick="clearProjectFilters('${p.id}')">Limpiar filtros</button></div></div><div class="controls"><div class="field"><label>Buscar</label><input id="search-${p.id}" placeholder="Actividad, grupo, subgrupo, responsable o predecesor..." oninput="renderTable('${p.id}')"></div><div class="field"><label>Estado</label><select id="filter-status-${p.id}" onchange="renderTable('${p.id}')"><option value="all">Todos</option><option>Pendiente</option><option>En ejecución</option><option>Vencido</option><option>Terminado</option></select></div><div class="field"><label>Tipo</label><select id="filter-type-${p.id}" onchange="renderTable('${p.id}')"><option value="all">Todos</option><option value="summary">Grupos / subgrupos</option><option value="task">Actividades</option></select></div><div class="field"><label>Ruta crítica</label><select id="filter-critical-${p.id}" onchange="renderTable('${p.id}')"><option value="all">Todos</option><option value="critical">Crítica</option><option value="noncritical">No crítica</option></select></div><div class="field"><label>Amarre</label><select id="filter-dependency-${p.id}" onchange="renderTable('${p.id}')"><option value="all">Todos</option><option value="linked">Amarradas</option><option value="blocked">Dependientes</option><option value="free">Sin amarre</option></select></div></div><div class="table-hierarchy-info" id="table-hint-${p.id}"></div><div class="table-wrap"><table id="table-${p.id}"><thead><tr><th>Código</th><th>Proceso</th><th>Inicio</th><th>Fin</th><th>Duración</th><th>Avance auto.</th><th>Estado</th><th>Amarre / predecesores</th><th>Confirmación</th><th>Responsable / notas</th></tr></thead><tbody></tbody></table></div></div><div class="section" style="box-shadow:none;margin-top:16px;padding:16px"><div class="section-head"><div><h3>Gantt con amarres · ${escapeHTML(p.short||p.name)}</h3><p>El Gantt también inicia agrupado. Sus flechas son independientes de la tabla. Las líneas del Gantt muestran solo los amarres visibles en pantalla.</p></div><div class="gantt-actions"><button class="btn small" onclick="setProjectTree('${p.id}',false,'gantt')">Expandir Gantt</button><button class="btn small" onclick="setProjectTree('${p.id}',true,'gantt')">Contraer Gantt</button><button class="btn small" onclick="exportExcel('${p.id}')">Excel ${escapeHTML(p.short||p.name)}</button></div></div><div class="gantt" id="gantt-${p.id}"></div></div></section>`}
+function dependencyArrowSVG(pid,tasks,min,total){
+  const rowH=58;
+  const visibleMap=new Map();
+  tasks.forEach((t,i)=>{visibleMap.set(String(t.uid),{t,i}); visibleMap.set('u:'+String(t.unique_id),{t,i}); visibleMap.set('t:'+String(t.task_id),{t,i}); visibleMap.set('o:'+String(t.outline),{t,i});});
+  const paths=[];
+  tasks.forEach((t,i)=>{
+    if(!Array.isArray(t.predecessors)||!t.predecessors.length)return;
+    t.predecessors.forEach(item=>{
+      const pred=item.predecessor||{};
+      const found=visibleMap.get('u:'+String(pred.unique_id))||visibleMap.get('t:'+String(pred.task_id))||visibleMap.get('o:'+String(pred.outline));
+      if(!found)return;
+      const type=String(item.type||'FS').toUpperCase();
+      const fromPoint=(type==='SS'||type==='SF')?'start':'finish';
+      const toPoint=(type==='FF'||type==='SF')?'finish':'start';
+      const x1=ganttPointX(found.t,fromPoint,min,total);
+      const x2=ganttPointX(t,toPoint,min,total);
+      const y1=found.i*rowH+(rowH/2);
+      const y2=i*rowH+(rowH/2);
+      if(!isFinite(x1)||!isFinite(x2)||!isFinite(y1)||!isFinite(y2))return;
+      const dir=x2>=x1?1:-1;
+      const elbow=Math.max(18,Math.min(55,Math.abs(x2-x1)/2));
+      const xMid1=clamp(x1+(dir*elbow),0,1000);
+      const xEnd=clamp(x2-(dir*8),0,1000);
+      const blocked=dependencyState(t).blocked;
+      const cls=blocked?'gantt-dep-path blocked':'gantt-dep-path';
+      const dotCls=blocked?'gantt-dep-dot blocked':'gantt-dep-dot';
+      const marker=blocked?`url(#depArrowBlocked-${pid})`:`url(#depArrow-${pid})`;
+      const d=`M ${x1.toFixed(1)} ${y1.toFixed(1)} H ${xMid1.toFixed(1)} V ${y2.toFixed(1)} H ${xEnd.toFixed(1)}`;
+      const title=escapeHTML(`${found.t.outline||''} → ${t.outline||''} · ${type}${item.lag?' · '+item.lag:''}`);
+      paths.push(`<path class="${cls}" vector-effect="non-scaling-stroke" d="${d}" marker-end="${marker}"><title>${title}</title></path><circle class="${dotCls}" cx="${x1.toFixed(1)}" cy="${y1.toFixed(1)}" r="2.5"><title>${title}</title></circle>`);
+    });
+  });
+  if(!paths.length)return '';
+  const h=Math.max(rowH,tasks.length*rowH);
+  return `<svg class="gantt-dep-svg" viewBox="0 0 1000 ${h}" preserveAspectRatio="none" aria-hidden="true"><defs><marker id="depArrow-${pid}" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L10,5 L0,10 Z" fill="#475569" opacity=".82"></path></marker><marker id="depArrowBlocked-${pid}" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L10,5 L0,10 Z" fill="#b91c1c" opacity=".82"></path></marker></defs>${paths.join('')}</svg>`;
+}
+function renderGantt(pid){
+  const p=projectById(pid); const all=displayTasks(pid); const tasks=visibleTreeTasks(pid);
+  const dates=all.flatMap(t=>[parseDate(t.start),parseDate(t.finish)]).filter(Boolean);
+  if(!dates.length){document.getElementById('gantt-'+pid).innerHTML='<div class="gantt-inner">Sin fechas para mostrar.</div>'; return;}
+  const min=dateOnly(new Date(Math.min(...dates.map(d=>d.getTime()))));
+  const max=dateOnly(new Date(Math.max(...dates.map(d=>d.getTime()))));
+  const total=Math.max(1,diffDays(min,max)+1);
+  const todayPos=Math.max(0,Math.min(100,(diffDays(min,controlDate())/total)*100));
+  const linkedVisible=tasks.filter(t=>dependencyState(t).has).length;
+  const blockedVisible=tasks.filter(t=>dependencyState(t).blocked).length;
+  const rows=tasks.map(t=>ganttRowHTML(t,min,total,false)).join('');
+  const arrows=dependencyArrowSVG(pid,tasks,min,total);
+  document.getElementById('gantt-'+pid).innerHTML=`<div class="gantt-inner"><div class="gantt-scale"><span>Procesos</span><span>${isoToDMY(p.start)} — ${isoToDMY(p.finish)} · línea roja = fecha de control</span></div><div class="gantt-hierarchy-controls"><small><b>${tasks.length}</b> registros visibles de <b>${all.length}</b>. Abre un grupo para ver sus actividades y sus amarres.</small><div class="gantt-legend"><span class="gantt-legend-item"><span class="gantt-legend-line"></span>Amarre Project visible</span><span class="gantt-legend-item"><span class="gantt-legend-line blocked"></span>Dependiente</span><span>Amarradas visibles: <b>${linkedVisible}</b></span><span>Dependientes: <b>${blockedVisible}</b></span></div></div><div class="gantt-tree-wrap" style="--today-pos:${todayPos}%"><span class="today-line"></span>${rows}${arrows}</div></div>`;
+}
+function ganttRowHTML(t,min,total,isContext){
+  const s=dateOnly(parseDate(t.start)), f=dateOnly(parseDate(t.finish));
+  const left=s?Math.max(0,Math.min(100,(diffDays(min,s)/total)*100)):0;
+  const width=(s&&f)?Math.max(.45,Math.min(100-left,((diffDays(s,f)+1)/total)*100)):.5;
+  const st=statusOf(t); const lvl=Math.min(8,Math.max(1,outlineDepth(t))); const indent=Math.max(0,(lvl-1)*16); const pr=pct(autoProgress(t)); const count=descendantLeafCount(t); const dep=dependencyState(t);
+  const sub=t.is_summary?`${count} actividades · ${pr}% automático · ${st}`:`${isoToDMY(t.start)} - ${isoToDMY(t.finish)} · ${pr}% automático · ${st}`;
+  const depText=dep.has?(dep.blocked?' · Dependiente':' · Con amarre'):'';
+  return `<div class="gantt-row ${ganttRowClass(t,isContext)} level-${lvl}"><div class="gantt-label" title="${escapeAttr(t.name)}" style="padding-left:${indent}px">${treeToggleHTML(t,t.project_id,'gantt')}<span class="gantt-level">N${lvl}</span><span class="outline">${escapeHTML(t.outline)}</span><span class="gantt-label-text"><span class="gantt-label-title">${escapeHTML(t.name)}</span><span class="gantt-label-sub">${escapeHTML(sub+depText)}${t.critical?' · Ruta crítica':''}</span></span></div><div class="gantt-track"><span class="gantt-bar ${t.is_summary?'summary':statusClass(st)}" style="left:${left}%;width:${width}%" title="${escapeAttr(st+' · '+isoToDMY(t.start)+' - '+isoToDMY(t.finish)+' · '+(t.predecessor_text||'Sin predecesor'))}"></span></div></div>`;
+}
+function renderTable(pid){
+  const tbody=document.querySelector('#table-'+pid+' tbody'); if(!tbody)return;
+  const q=(document.getElementById('search-'+pid)?.value||'').toLowerCase().trim();
+  const fs=document.getElementById('filter-status-'+pid)?.value||'all';
+  const ft=document.getElementById('filter-type-'+pid)?.value||'all';
+  const fc=document.getElementById('filter-critical-'+pid)?.value||'all';
+  const fd=document.getElementById('filter-dependency-'+pid)?.value||'all';
+  const all=displayTasks(pid);
+  const filterActive=q||fs!=='all'||ft!=='all'||fc!=='all'||fd!=='all'||activeStatus!=='all';
+  let include=new Set(),direct=new Set();
+  all.forEach(t=>{if(tableMatches(t,q,fs,ft,fc,fd)){include.add(t.uid); direct.add(t.uid); if(filterActive)ancestorTasks(t).forEach(a=>include.add(a.uid));}});
+  if(!filterActive){include=new Set(all.map(t=>t.uid)); direct=new Set(all.map(t=>t.uid));}
+  const rows=all.filter(t=>include.has(t.uid)&&(filterActive||!hiddenByCollapsedAncestor(t,'table')));
+  tbody.innerHTML=rows.map(t=>rowHTML(t,!direct.has(t.uid))).join('') || `<tr><td colspan="10">No hay registros con los filtros aplicados.</td></tr>`;
+  const hint=document.getElementById('table-hint-'+pid);
+  if(hint){const grupos=rows.filter(t=>t.is_summary).length; const acts=rows.filter(t=>!t.is_summary).length; const linked=rows.filter(t=>dependencyState(t).has).length; const blocked=rows.filter(t=>dependencyState(t).blocked).length; hint.innerHTML=`<span>Mostrando <b>${rows.length}</b> registros: <b>${grupos}</b> grupos/subgrupos y <b>${acts}</b> actividades.</span>${filterActive?'<span class="hierarchy-chip context">Contexto por filtro</span>':''}<span class="dep-badge linked">${linked} con amarre</span><span class="dep-badge blocked">${blocked} dependientes</span>`;}
+}
+rowHTML=function(t,isContext=false){
+  const st=statusOf(t); const pr=autoProgress(t); const m=meta[t.uid]||{}; const conf=isConfirmed(t); const dep=dependencyState(t); const lvl=Math.min(8,Math.max(1,outlineDepth(t))); const indent=Math.max(0,(lvl-1)*18); const count=descendantLeafCount(t);
+  const action=t.is_summary?groupActionHTML(t): conf?`<span class="badge done">Confirmado</span><div class="confirm-note">${escapeHTML(confirmations[t.uid].date||'')}</div><button class="btn small" onclick="undoConfirm('${t.uid}')">Quitar</button>`: dep.blocked?`<span class="dep-badge blocked">Dependiente</span><div class="confirm-note">En espera de que se confirme el proceso predecesor.</div>`: canConfirm(t)?`<button class="btn small green" onclick="openConfirm('${t.uid}')">Confirmar terminado</button><div class="confirm-note">Llegó a 100%; seguirá como vencido hasta confirmar.</div>`:`<span class="confirm-note">Disponible cuando llegue a 100% por fecha</span>`;
+  const context=isContext?'<span class="hierarchy-chip context">Contexto</span>':''; const ownerDefault=(m.owner!==undefined&&m.owner!==null)?m.owner:(t.responsible||t.resource_names||'');
+  return `<tr class="${rowGroupClass(t,isContext)}"><td><div class="code-cell">${treeToggleHTML(t,t.project_id,'table')}<span class="outline">${escapeHTML(t.outline)}</span></div><div class="table-level">Nivel ${lvl}</div></td><td class="name-cell"><div class="tree-name" style="padding-left:${indent}px">${lvl>1?'<span class="tree-connector"></span>':''}<div class="tree-name-main"><b>${escapeHTML(t.name)}</b><div class="confirm-note">${context}${t.critical?' <span class="badge overdue">Ruta crítica</span>':''}${t.is_summary?` <span class="badge running">${count} actividades</span>`:''}</div></div></div></td><td>${isoToDMY(t.start)}</td><td>${isoToDMY(t.finish)}</td><td>${escapeHTML(t.duration_text||'')}</td><td><div class="progress ${progressClass(st)}"><i style="width:${pct(pr)}%"></i></div><span class="progress-number">${pct(pr)}%</span></td><td>${statusBadge(st)}</td><td>${dependencyDetailHTML(t,false)}</td><td>${action}</td><td><div class="field"><input placeholder="Responsable" value="${escapeAttr(ownerDefault)}" onchange="setMeta('${t.uid}','owner',this.value)"></div><div class="field" style="margin-top:6px"><textarea rows="2" placeholder="Notas" onchange="setMeta('${t.uid}','notes',this.value)">${escapeHTML(m.notes||'')}</textarea></div></td></tr>`;
+};
+
+window.addEventListener('DOMContentLoaded',async()=>{ if(dateConfig.mode==='auto'){dateConfig.manualDate=dateConfig.manualDate||'2026-06-17';} initializeDefaultCollapsedTree(); await loadConfirmationsFromSupabase(); await loadMetaFromSupabase(); renderAll(); setTimeout(()=>showOpeningAlerts(false),500); });
 </script>
 </body>
 </html>
