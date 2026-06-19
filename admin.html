@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seguimiento ZC Piura - Panel administrador</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body data-page="admin">
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><a class="logo" href="index.html"><img src="assets/img/logo.png" alt="CVC Energia"></a><div><h1>Panel administrador</h1><p>Supabase + carga .mpp</p></div></div>
+    <nav class="nav"><a href="index.html">Inicio <small>Resumen</small></a><a href="conexion.html">Conexion VDCH <small>Proyecto</small></a><a href="alimentador.html">Alimentador Sullana <small>Proyecto</small></a><a href="admin.html" class="active">Panel administrador <small>Carga</small></a></nav>
+    <div class="side-card"><h3>Acceso definido</h3><p>El ingreso del administrador sera con correo y contrasena mediante Supabase Auth.</p><p><b>Correo:</b><br>mzarate@cvcenergia.com.pe</p></div>
+    <div class="side-card"><h3>Flujo de actualizacion</h3><ul><li>Iniciar sesion.</li><li>Seleccionar proyecto.</li><li>Subir archivo .mpp.</li><li>Se guarda en Supabase Storage.</li><li>Se registra en mpp_imports como pendiente.</li><li>El proceso de conversion actualiza el Gantt y el cuadro.</li></ul></div>
+  </aside>
+  <main class="main">
+    <section class="hero"><span class="eyebrow">Administracion segura</span><h2>Panel para subir cronogramas Microsoft Project</h2><p>El panel usa Supabase Auth para validar al administrador. La contrasena no se guarda en el codigo ni en GitHub; solo se configura en Supabase Authentication.</p><div class="hero-actions"><a class="btn" href="index.html">Volver al panel</a><a class="btn" href="conexion.html">Ver Conexion VDCH</a><a class="btn" href="alimentador.html">Ver Alimentador</a><button class="btn red" id="logout-btn" style="display:none">Cerrar sesion</button></div><div class="grid metrics" id="admin-metrics"></div></section>
+
+    <section class="section" id="login-section"><div class="section-head"><div><h2>1. Inicio de sesion</h2><p>Ingresa con el usuario administrador registrado en Supabase.</p></div><span class="badge confirm">Requerido</span></div><div class="admin-grid"><div class="drop"><h3>Acceso administrador</h3><div class="field"><label>Correo</label><input id="login-email" type="email" autocomplete="username" value="mzarate@cvcenergia.com.pe"></div><div class="field" style="margin-top:10px"><label>Contrasena</label><input id="login-password" type="password" autocomplete="current-password" placeholder="Contrasena de Supabase Auth"></div><div class="toolbar" style="justify-content:flex-start;margin-top:14px"><button class="btn primary" id="login-btn">Ingresar</button></div><div id="login-result" class="notice" style="margin-top:12px">Esperando inicio de sesion.</div></div><div class="drop"><h3>Importante</h3><p class="muted">La contrasena se valida directamente con Supabase Auth. No aparece en el SQL, no aparece en el codigo y no debe subirse a GitHub.</p><p class="muted">Si cambias la contrasena, se cambia desde <b>Supabase → Authentication → Users</b>.</p></div></div></section>
+
+    <div id="admin-content" style="display:none">
+      <section class="section"><div class="section-head"><div><h2>2. Subir nuevo archivo .mpp a Supabase</h2><p>El archivo se almacena en el bucket privado <b>mpp-files</b> y queda registrado en <b>mpp_imports</b>.</p></div><span class="badge running">Supabase Storage</span></div><div class="admin-grid"><div class="drop"><h3>Carga de archivo</h3><div class="field"><label>Proyecto</label><select id="upload-project"><option value="conexion-vdch">Conexión VDCH</option><option value="alimentador-sullana">Alimentador Sullana</option></select></div><div class="field" style="margin-top:10px"><label>Archivo .mpp</label><input type="file" id="mpp-input" accept=".mpp"></div><div class="toolbar" style="justify-content:flex-start;margin-top:14px"><button class="btn green" id="upload-mpp-btn">Subir .mpp a Supabase</button></div><div id="mpp-result" class="notice" style="margin-top:12px">Esperando archivo .mpp.</div></div><div class="drop"><h3>Procesamiento</h3><div id="process-box" class="notice"></div><div class="toolbar" style="justify-content:flex-start;margin-top:14px"><button class="btn" id="refresh-imports">Actualizar historial</button><a class="btn ghost" id="actions-link" href="#" target="_blank" style="display:none">Abrir GitHub Actions</a></div></div></div></section>
+
+      <section class="section"><div class="section-head"><div><h2>3. Historial de importaciones</h2><p>Revisa los archivos subidos y su estado.</p></div></div><div class="table-wrap"><table class="table" id="imports-table"><thead><tr><th>Fecha</th><th>Proyecto</th><th>Archivo</th><th>Estado</th><th>Mensaje</th></tr></thead><tbody></tbody></table></div></section>
+
+      <section class="section"><div class="section-head"><div><h2>4. Respaldo local de data</h2><p>Uso auxiliar. La web publica ahora intenta leer Supabase y, si falla, usa <b>data/projects.json</b> como respaldo.</p></div><div class="toolbar"><button class="btn green" id="download-json">Descargar projects.json local</button><button class="btn ghost" id="reset-local">Restaurar datos locales</button></div></div><div class="admin-grid"><div class="drop"><h3>Importar JSON local</h3><input type="file" id="json-input" accept="application/json,.json"><p class="muted">Debe tener el arreglo <b>projects</b>.</p><div id="json-result" class="notice" style="margin-top:12px">Esperando archivo JSON.</div></div><div class="drop"><h3>Pegar JSON</h3><textarea id="json-text" placeholder='Pega aqui el contenido de projects.json'></textarea><div class="toolbar" style="justify-content:flex-start"><button class="btn primary" id="load-json-text">Cargar JSON pegado</button><button class="btn" id="validate-json-text">Validar</button></div><div id="json-text-result" class="notice" style="margin-top:12px">Sin validar.</div></div></div></section>
+    </div>
+
+    <footer class="footer">CVC Energia · Panel administrador Supabase</footer>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/admin.js"></script>
+</body>
+</html>

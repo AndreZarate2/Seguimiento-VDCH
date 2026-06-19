@@ -1,0 +1,68 @@
+name: Procesar MPP subido a Supabase
+
+on:
+  workflow_dispatch:
+    inputs:
+      import_id:
+        description: 'ID de mpp_imports a procesar. Opcional: si se deja vacio procesa el pendiente mas antiguo.'
+        required: false
+        default: ''
+      project_slug:
+        description: 'Proyecto opcional: conexion-vdch o alimentador-sullana.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SUPABASE_MPP_BUCKET: mpp-files
+      IMPORT_ID: ${{ github.event.inputs.import_id }}
+      PROJECT_SLUG: ${{ github.event.inputs.project_slug }}
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias Python
+        run: pip install requests
+
+      - name: Descargar MPP pendiente desde Supabase Storage
+        run: python tools/supabase/download_pending_mpp.py
+
+      - name: Convertir MPP a JSON con MPXJ
+        run: mvn -q -f tools/mpp-converter/pom.xml exec:java -Dexec.args="uploads/mpp data/projects.json"
+
+      - name: Validar JSON generado
+        run: python -m json.tool data/projects.json > /tmp/projects.valid.json
+
+      - name: Actualizar tablas de Supabase
+        run: python tools/supabase/upsert_projects_to_supabase.py data/projects.json tools/supabase/selected_imports.json
+
+      - name: Commit automatico del JSON respaldo
+        run: |
+          if git diff --quiet -- data/projects.json uploads/mpp; then
+            echo "Sin cambios para commit"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/projects.json uploads/mpp
+            git commit -m "Procesar MPP desde Supabase y actualizar data"
+            git push
+          fi

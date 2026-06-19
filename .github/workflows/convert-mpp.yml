@@ -1,0 +1,62 @@
+name: Convertir archivos MPP a projects.json
+
+on:
+  push:
+    paths:
+      - 'uploads/mpp/**/*.mpp'
+      - 'tools/mpp-converter/**'
+      - 'tools/supabase/**'
+      - '.github/workflows/convert-mpp.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Convertir MPP a JSON
+        run: mvn -q -f tools/mpp-converter/pom.xml exec:java -Dexec.args="uploads/mpp data/projects.json"
+
+      - name: Validar JSON generado
+        run: python -m json.tool data/projects.json > /tmp/projects.valid.json
+
+      - name: Preparar Python para sincronizar Supabase
+        if: ${{ env.SUPABASE_URL != '' && env.SUPABASE_SERVICE_ROLE_KEY != '' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias Python
+        if: ${{ env.SUPABASE_URL != '' && env.SUPABASE_SERVICE_ROLE_KEY != '' }}
+        run: pip install requests
+
+      - name: Sincronizar projects/tasks en Supabase
+        if: ${{ env.SUPABASE_URL != '' && env.SUPABASE_SERVICE_ROLE_KEY != '' }}
+        run: python tools/supabase/upsert_projects_to_supabase.py data/projects.json
+
+      - name: Commit automatico si hubo cambios
+        run: |
+          if git diff --quiet -- data/projects.json; then
+            echo "Sin cambios en data/projects.json"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/projects.json
+            git commit -m "Actualizar data/projects.json desde archivos MPP"
+            git push
+          fi
