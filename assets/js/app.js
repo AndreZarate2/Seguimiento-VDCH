@@ -5,10 +5,11 @@ let GLOBAL_STATUS = 'all';
 const LEGACY_CONFIRM_KEY = 'zc_confirmations';
 const MANUAL_STATUS_KEY = 'zc_manual_task_status_v3';
 const TREE_STATE_KEY = 'zc_tree_state_v5_independent';
+const CONFIRM_SYNC_EVENT_KEY = 'zc_confirmation_sync_event_v2';
 
-const confirms = safeJSON(localStorage.getItem(LEGACY_CONFIRM_KEY), {});
-const manualStatus = safeJSON(localStorage.getItem(MANUAL_STATUS_KEY), {});
-const treeState = safeJSON(localStorage.getItem(TREE_STATE_KEY), { signature: '', table: {}, gantt: {} });
+let confirms = safeJSON(localStorage.getItem(LEGACY_CONFIRM_KEY), {});
+let manualStatus = safeJSON(localStorage.getItem(MANUAL_STATUS_KEY), {});
+let treeState = safeJSON(localStorage.getItem(TREE_STATE_KEY), { signature: '', table: {}, gantt: {} });
 
 function safeJSON(text, fallback) {
   try { return text ? JSON.parse(text) : fallback; } catch (_) { return fallback; }
@@ -27,6 +28,14 @@ function taskKey(t) { return t.project_id + '|' + (t.uid || t.unique_id || t.tas
 function saveConfirm() { localStorage.setItem(LEGACY_CONFIRM_KEY, JSON.stringify(confirms)); }
 function saveManualStatus() { localStorage.setItem(MANUAL_STATUS_KEY, JSON.stringify(manualStatus)); }
 function saveTreeState() { localStorage.setItem(TREE_STATE_KEY, JSON.stringify(treeState)); }
+function reloadLocalState() {
+  confirms = safeJSON(localStorage.getItem(LEGACY_CONFIRM_KEY), {});
+  manualStatus = safeJSON(localStorage.getItem(MANUAL_STATUS_KEY), {});
+  treeState = safeJSON(localStorage.getItem(TREE_STATE_KEY), { signature: '', table: {}, gantt: {} });
+}
+function emitConfirmationSync(key, value) {
+  localStorage.setItem(CONFIRM_SYNC_EVENT_KEY, JSON.stringify({ key, value, ts: Date.now() }));
+}
 
 async function loadData() {
   const cfg = window.ZC_CONFIG || {};
@@ -68,6 +77,64 @@ async function supabaseRest(path) {
     throw new Error('REST ' + res.status + ' ' + text);
   }
   return await res.json();
+}
+
+function supabaseEnabled() {
+  const cfg = window.ZC_CONFIG || {};
+  return !!(cfg.useSupabaseData && cfg.supabaseUrl && cfg.supabaseKey);
+}
+async function supabaseMutate(method, path, body = null, extraHeaders = {}) {
+  const cfg = window.ZC_CONFIG || {};
+  const base = String(cfg.supabaseUrl || '').replace(/\/$/, '');
+  const headers = {
+    apikey: cfg.supabaseKey,
+    Authorization: 'Bearer ' + cfg.supabaseKey,
+    Accept: 'application/json',
+    ...extraHeaders
+  };
+  const opts = { method, headers, cache: 'no-store' };
+  if (body !== null) {
+    headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  const res = await fetch(base + '/rest/v1/' + path, opts);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error('Supabase no acepto la confirmacion: ' + res.status + ' ' + text);
+  }
+  if (res.status === 204) return null;
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : null;
+}
+function controlDateISO() {
+  const x = day(CONTROL_DATE) || day(new Date());
+  return x ? x.toISOString().slice(0, 10) : null;
+}
+async function persistConfirmationToSupabase(t, value) {
+  if (!supabaseEnabled()) return { skipped: true };
+  if (!t?.uid) throw new Error('La tarea no tiene uid para sincronizar con Supabase.');
+  if (value) {
+    await supabaseMutate(
+      'POST',
+      'task_confirmations?on_conflict=uid',
+      {
+        uid: t.uid,
+        confirmed: true,
+        confirmed_at: new Date().toISOString(),
+        control_date: controlDateISO(),
+        note: null
+      },
+      { Prefer: 'resolution=merge-duplicates,return=minimal' }
+    );
+  } else {
+    await supabaseMutate(
+      'DELETE',
+      'task_confirmations?uid=eq.' + encodeURIComponent(t.uid),
+      null,
+      { Prefer: 'return=minimal' }
+    );
+  }
+  return { synced: true };
 }
 
 async function loadDataFromSupabase() {
@@ -398,20 +465,63 @@ function durationDays(t) {
   return Math.max(0, Math.round((f - s) / 86400000) + 1) + 'd';
 }
 
+function normalizePredecessorItem(item) {
+  if (item === null || item === undefined || item === '') return null;
+  if (typeof item === 'number' || typeof item === 'string') {
+    const raw = String(item).trim();
+    const m = raw.match(/^(\d+)([A-Z]{2})?(.*)$/i);
+    return { task_id: m ? Number(m[1]) : raw, unique_id: m ? Number(m[1]) : raw, type: m?.[2] || 'FS', lag: (m?.[3] || '').trim(), raw };
+  }
+  const pred = item.predecessor || item.pred || item.from || item.source || item;
+  return {
+    uid: pred.uid || pred.task_uid || pred.predecessor_uid || item.uid || item.predecessor_uid,
+    outline: pred.outline || pred.outline_number || pred.wbs || item.outline || item.predecessor_outline,
+    task_id: pred.task_id ?? pred.id ?? pred.taskId ?? pred.predecessor_task_id ?? item.task_id ?? item.id ?? item.predecessor_task_id,
+    unique_id: pred.unique_id ?? pred.uniqueId ?? pred.uniqueID ?? pred.predecessor_unique_id ?? pred.predecessorUniqueID ?? item.unique_id ?? item.uniqueID ?? item.predecessor_unique_id,
+    name: pred.name || item.name || item.predecessor_name,
+    type: item.type || item.relation || item.link_type || pred.type || 'FS',
+    lag: item.lag || item.lag_text || pred.lag || '',
+    raw: item
+  };
+}
 function findPredecessorTask(t, pred) {
   const p = projectById(t.project_id);
   if (!p || !pred) return null;
-  return p.tasks.find(x => Number(x.unique_id) === Number(pred.unique_id)) ||
-    p.tasks.find(x => String(x.uid) === String(pred.uid)) ||
-    p.tasks.find(x => String(x.outline) === String(pred.outline)) ||
-    p.tasks.find(x => Number(x.task_id) === Number(pred.task_id)) || null;
+  const candidates = p.tasks || [];
+  const uid = pred.uid != null ? String(pred.uid) : '';
+  const outline = pred.outline != null ? String(pred.outline) : '';
+  const taskId = pred.task_id != null && pred.task_id !== '' ? Number(pred.task_id) : NaN;
+  const uniqueId = pred.unique_id != null && pred.unique_id !== '' ? Number(pred.unique_id) : NaN;
+  return candidates.find(x => uid && String(x.uid) === uid) ||
+    candidates.find(x => outline && String(x.outline) === outline) ||
+    candidates.find(x => !Number.isNaN(uniqueId) && Number(x.unique_id) === uniqueId) ||
+    candidates.find(x => !Number.isNaN(taskId) && Number(x.task_id) === taskId) ||
+    candidates.find(x => !Number.isNaN(taskId) && Number(x.unique_id) === taskId) ||
+    null;
+}
+function parsePredecessorText(t) {
+  const txt = String(t.predecessor_text || t.predecessors_text || '').trim();
+  if (!txt) return [];
+  return txt.split(/[;,]/).map(part => part.trim()).filter(Boolean).map(part => {
+    const m = part.match(/^(\d+)([A-Z]{2})?(.*)$/i);
+    if (!m) return null;
+    const task_id = Number(m[1]);
+    return { task_id, unique_id: task_id, type: m[2] || 'FS', lag: (m[3] || '').trim(), raw: part };
+  }).filter(Boolean);
 }
 function predecessorLinks(t) {
-  return (t.predecessors || []).map(item => {
-    const pred = item.predecessor || {};
+  const jsonItems = Array.isArray(t.predecessors) ? t.predecessors : [];
+  const normalized = jsonItems.map(normalizePredecessorItem).filter(Boolean);
+  const parsedText = parsePredecessorText(t);
+  const combined = [...normalized, ...parsedText];
+  const seen = new Set();
+  return combined.map(pred => {
     const task = findPredecessorTask(t, pred);
-    return { type: item.type || 'FS', lag: item.lag || '', outline: pred.outline || '', name: pred.name || '', task };
-  });
+    const key = String(task?.uid || pred.uid || pred.outline || pred.unique_id || pred.task_id || pred.raw);
+    if (seen.has(key)) return null;
+    seen.add(key);
+    return { type: pred.type || 'FS', lag: pred.lag || '', outline: pred.outline || '', name: pred.name || '', task, pred };
+  }).filter(Boolean);
 }
 function isCompleteForDependency(task) {
   if (!task) return false;
@@ -434,7 +544,7 @@ function dependencyHTML(t) {
   const badge = `<span class="dep-badge ${dep.blocked ? 'blocked' : 'linked'}">${dep.blocked ? 'Amarre pendiente' : 'Amarrada'}</span>`;
   return badge + '<div class="dep-list">' + dep.links.map(l => {
     const ok = l.task && isCompleteForDependency(l.task);
-    return `<div class="dep-item ${ok ? 'ok' : 'blocked'}"><b>${esc(l.task?.outline || l.outline || '-')} · ${esc(l.task?.name || l.name || 'Predecesor')}</b><br>${esc(l.type || 'FS')} ${esc(l.lag || '')} · ${ok ? 'Liberado' : 'Pendiente'}</div>`;
+    return `<div class="dep-item ${ok ? 'ok' : 'blocked'}"><b>${esc(l.task?.outline || l.pred?.outline || l.pred?.task_id || l.pred?.unique_id || '-')} · ${esc(l.task?.name || l.name || 'Predecesor')}</b><br>${esc(l.type || 'FS')} ${esc(l.lag || '')} · ${ok ? 'Liberado' : 'Pendiente'}</div>`;
   }).join('') + '</div>';
 }
 function canConfirmTask(t) {
@@ -458,21 +568,45 @@ function confirmHTML(t) {
   }
   return `<button class="btn small green" onclick="setTaskConfirmation('${esc(taskKey(t))}', true)">Confirmar terminado</button>`;
 }
-function setTaskConfirmation(key, value) {
+async function setTaskConfirmation(key, value) {
   const t = taskByKey(key);
   if (!t) return;
   if (value) {
     const chk = canConfirmTask(t);
     if (!chk.ok) { showToast('No se puede confirmar', esc(chk.reason)); return; }
+  }
+
+  const oldManual = manualStatus[key];
+  const oldLocalConfirm = confirms[key];
+  const oldServerConfirm = !!t.confirmed;
+
+  if (value) {
     manualStatus[key] = 'confirmed';
     confirms[key] = new Date().toISOString();
+    t.confirmed = true;
   } else {
     manualStatus[key] = 'pending';
     delete confirms[key];
+    t.confirmed = false;
   }
   saveManualStatus();
   saveConfirm();
+  emitConfirmationSync(key, value);
   render();
+
+  try {
+    await persistConfirmationToSupabase(t, value);
+    showToast('Confirmacion actualizada', value ? 'La actividad quedo marcada como terminada en Supabase.' : 'La confirmacion fue retirada de Supabase.');
+  } catch (err) {
+    if (oldManual === undefined) delete manualStatus[key]; else manualStatus[key] = oldManual;
+    if (oldLocalConfirm === undefined) delete confirms[key]; else confirms[key] = oldLocalConfirm;
+    t.confirmed = oldServerConfirm;
+    saveManualStatus();
+    saveConfirm();
+    emitConfirmationSync(key, oldServerConfirm);
+    render();
+    showToast('No se pudo sincronizar con Supabase', `${esc(err.message || err)}<br><br>Ejecuta el SQL de permisos de confirmaciones incluido en el ZIP y vuelve a intentar.`);
+  }
 }
 function taskByKey(key) {
   for (const p of DATA.projects) {
@@ -577,6 +711,15 @@ function applyDateSettings() {
   CONTROL_DATE = (mode === 'manual' && val) ? new Date(val + 'T12:00:00') : new Date();
   render();
 }
+
+window.addEventListener('storage', async (ev) => {
+  if (![LEGACY_CONFIRM_KEY, MANUAL_STATUS_KEY, CONFIRM_SYNC_EVENT_KEY].includes(ev.key)) return;
+  reloadLocalState();
+  if (supabaseEnabled()) {
+    try { await loadData(); } catch (_) {}
+  }
+  render();
+});
 
 window.addEventListener('DOMContentLoaded', async () => {
   await loadData();
