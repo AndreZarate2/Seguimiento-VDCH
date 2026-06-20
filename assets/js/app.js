@@ -4,7 +4,7 @@ let GLOBAL_STATUS = 'all';
 
 const LEGACY_CONFIRM_KEY = 'zc_confirmations';
 const MANUAL_STATUS_KEY = 'zc_manual_task_status_v3';
-const TREE_STATE_KEY = 'zc_tree_state_v5_independent';
+const TREE_STATE_KEY = 'zc_tree_state_v6_gantt_full';
 const CONFIRM_SYNC_EVENT_KEY = 'zc_confirmation_sync_event_v2';
 
 let confirms = safeJSON(localStorage.getItem(LEGACY_CONFIRM_KEY), {});
@@ -243,11 +243,13 @@ function initializeTreeState(force = false) {
   treeState.signature = sig;
   treeState.table = {};
   treeState.gantt = {};
+
+  // La tabla mantiene la vista agrupada inicial para lectura rapida.
+  // El Gantt debe abrirse completamente desplegado; por eso su mapa queda vacio.
   DATA.projects.forEach(p => {
     tasksOf(p).forEach(t => {
       if (hasChildren(p, t) && Number(t.outline_level || 1) >= 2) {
         treeState.table[p.id + '|' + t.outline] = true;
-        treeState.gantt[p.id + '|' + t.outline] = true;
       }
     });
   });
@@ -615,32 +617,113 @@ function taskByKey(key) {
   return null;
 }
 
+function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+function dateMs(v) { const x = day(v); return x ? x.getTime() : null; }
+function startOfMonthMs(ms) { const x = new Date(ms); return new Date(x.getFullYear(), x.getMonth(), 1).getTime(); }
+function addMonthsMs(ms, count = 1) { const x = new Date(ms); return new Date(x.getFullYear(), x.getMonth() + count, 1).getTime(); }
+function ganttMonthLabel(ms) {
+  const x = new Date(ms);
+  return x.toLocaleDateString('es-PE', { month: 'short', year: '2-digit' }).replace('.', '');
+}
+function taskStartMs(t) { return dateMs(t.start); }
+function taskFinishMs(t) {
+  const x = dateMs(t.finish);
+  return x == null ? null : x + 86400000;
+}
+function ganttBounds(p) {
+  const dated = tasksOf(p).filter(t => d(t.start) && d(t.finish));
+  const starts = dated.map(taskStartMs).filter(x => x != null);
+  const finishes = dated.map(taskFinishMs).filter(x => x != null);
+  let min = dateMs(p.start) ?? (starts.length ? Math.min(...starts) : Date.now());
+  let max = taskFinishMs({ finish: p.finish }) ?? (finishes.length ? Math.max(...finishes) : min + 86400000);
+  if (starts.length) min = Math.min(min, Math.min(...starts));
+  if (finishes.length) max = Math.max(max, Math.max(...finishes));
+  const pad = 7 * 86400000;
+  min -= pad;
+  max += pad;
+  if (max <= min) max = min + 86400000;
+  return { min, max, total: Math.max(86400000, max - min) };
+}
+function ganttPct(ms, min, total) { return clamp(((ms - min) / total) * 100, 0, 100); }
+function ganttCalendarHTML(min, max, total) {
+  let cur = startOfMonthMs(min);
+  let html = '';
+  let guard = 0;
+  while (cur < max && guard++ < 80) {
+    const next = addMonthsMs(cur, 1);
+    const left = ganttPct(Math.max(cur, min), min, total);
+    const right = ganttPct(Math.min(next, max), min, total);
+    const width = Math.max(.2, right - left);
+    html += `<span class="gantt-month" style="left:${left}%;width:${width}%">${esc(ganttMonthLabel(cur))}</span>`;
+    cur = next;
+  }
+  return `<div class="gantt-calendar">${html}</div>`;
+}
+function ganttMonthGridHTML(min, max, total) {
+  let cur = startOfMonthMs(min);
+  let html = '';
+  let guard = 0;
+  while (cur < max && guard++ < 80) {
+    const left = ganttPct(cur, min, total);
+    html += `<span style="left:${left}%"></span>`;
+    cur = addMonthsMs(cur, 1);
+  }
+  return `<div class="gantt-month-grid">${html}</div>`;
+}
+function ganttLabelMeta(t) {
+  const who = t.responsible || t.resource_names || '';
+  return [fmt(t.start), fmt(t.finish), who].filter(Boolean).join(' · ');
+}
+
 function renderGantt(pid) {
   const p = projectById(pid), el = qs('gantt-' + pid);
   if (!el) return;
   const rows = filteredTasks(pid, 'gantt');
-  const dated = rows.filter(t => d(t.start) && d(t.finish));
-  const min = dated.length ? Math.min(...dated.map(t => d(t.start).getTime())) : Date.now();
-  const max = dated.length ? Math.max(...dated.map(t => d(t.finish).getTime())) : Date.now() + 86400000;
-  const total = Math.max(1, max - min);
+  const bounds = ganttBounds(p);
+  const { min, max, total } = bounds;
   const today = day(CONTROL_DATE);
-  const todayPct = today ? Math.max(0, Math.min(100, ((today - min) / total) * 100)) : 0;
-  const rowH = 56;
+  const todayMs = today ? today.getTime() : null;
+  const todayPct = todayMs == null ? 0 : ganttPct(todayMs, min, total);
+  const rowH = 44;
+  const totalDays = Math.ceil(total / 86400000);
+  const timelineWidth = Math.max(1280, Math.ceil(totalDays / 7) * 36);
   const visibleByUid = new Map(rows.map((t, i) => [String(t.uid), { t, i }]));
   const visibleByOutline = new Map(rows.map((t, i) => [String(t.outline), { t, i }]));
+  const monthGrid = ganttMonthGridHTML(min, max, total);
   const rowHTML = rows.map((t, i) => {
-    const s = d(t.start), f = d(t.finish);
-    const left = s ? ((s - min) / total) * 100 : 0;
-    const width = (s && f) ? Math.max(.3, ((f - s) / total) * 100) : 0;
+    const s = taskStartMs(t), f = taskFinishMs(t);
+    const hasDate = s != null && f != null;
+    const left = hasDate ? ganttPct(s, min, total) : 0;
+    const right = hasDate ? ganttPct(f, min, total) : 0;
+    const width = hasDate ? Math.max(.35, right - left) : 0;
     const st = statusOf(t);
-    const pad = Math.max(0, Number(t.outline_level || 1) - 1) * 12;
+    const pad = Math.max(0, Number(t.outline_level || 1) - 1) * 14;
     const hc = hasChildren(p, t);
     const col = treeMap('gantt')[pid + '|' + t.outline];
     const dep = dependencyState(t);
-    return `<div class="gantt-row ${isSummary(t) ? 'group' : ''} ${dep.blocked && !isSummary(t) ? 'gantt-blocked' : ''}" data-uid="${esc(t.uid)}" data-index="${i}"><div class="gantt-label" style="padding-left:${pad}px">${hc ? `<button class="tree-toggle ${col ? 'collapsed' : ''}" onclick="toggleNode('${pid}','${esc(t.outline)}','gantt')">${col ? '+' : '−'}</button>` : '<span class="tree-toggle-spacer"></span>'}<span class="outline">${esc(t.outline)}</span><span class="gantt-label-name">${esc(t.name)}</span></div><div class="gantt-track"><i class="gantt-bar ${isSummary(t) ? 'summary' : progressClass(st)}" style="left:${left}%;width:${width}%"></i></div></div>`;
-  }).join('');
-  el.innerHTML = `<div class="gantt-inner"><div class="gantt-tree-wrap" style="--row-h:${rowH}px"><div class="gantt-scale"><div>Actividad</div><div>${fmt(min)} - ${fmt(max)}</div></div><div class="today-line" style="left:calc(var(--label-w) + var(--gap) + ${todayPct}%);"></div>${rowHTML}<svg class="gantt-dep-svg" viewBox="0 0 100 ${Math.max(1, rows.length * rowH)}" preserveAspectRatio="none">${dependencyArrowSVG(rows, min, total, rowH, visibleByUid, visibleByOutline)}</svg></div></div>`;
+    const group = isSummary(t);
+    const milestone = !!t.is_milestone || (hasDate && Math.abs(f - s) <= 86400000);
+    const pr = autoProgress(t);
+    const title = `${t.outline || ''} ${t.name || ''}\n${fmt(t.start)} - ${fmt(t.finish)}\n${st}${dep.blocked ? '\nDependencias pendientes' : ''}`;
+    const barClass = group ? 'summary' : progressClass(st);
+    const bar = !hasDate
+      ? `<span class="gantt-no-date">Sin fecha</span>`
+      : milestone
+        ? `<i class="gantt-bar milestone ${barClass}" style="left:${left}%" title="${esc(title)}"></i>`
+        : `<i class="gantt-bar ${barClass}" style="left:${left}%;width:${width}%" title="${esc(title)}"><em style="width:${pr}%"></em></i>`;
+    return `<div class="gantt-row ${group ? 'group' : ''} ${dep.blocked && !group ? 'gantt-blocked' : ''}" data-uid="${esc(t.uid)}" data-index="${i}"><div class="gantt-label" style="padding-left:${pad}px">${hc ? `<button class="tree-toggle ${col ? 'collapsed' : ''}" title="Desplegar / contraer" onclick="toggleNode('${pid}','${esc(t.outline)}','gantt')">${col ? '+' : '−'}</button>` : '<span class="tree-toggle-spacer"></span>'}<span class="outline">${esc(t.outline)}</span><span class="gantt-label-text"><b>${esc(t.name)}</b><small>${esc(ganttLabelMeta(t))}</small></span></div><div class="gantt-track">${monthGrid}${bar}</div></div>`;
+  }).join('') || '<div class="gantt-empty">Sin tareas para mostrar con los filtros actuales.</div>';
+  const subtitle = `${rows.length} filas visibles · ${fmt(min)} - ${fmt(max)}`;
+  el.innerHTML = `<div class="gantt-inner"><div class="gantt-summary"><b>${esc(p.short || p.name)}</b><span>${esc(subtitle)}</span></div><div class="gantt-tree-wrap" style="--row-h:${rowH}px;--timeline-min-w:${timelineWidth}px"><div class="gantt-scale"><div class="gantt-scale-label">Actividad</div>${ganttCalendarHTML(min, max, total)}</div>${todayMs != null ? `<div class="today-line" title="Fecha de control" style="left:calc(var(--label-w) + var(--gap) + ${(todayPct / 100) * timelineWidth}px);"></div>` : ''}${rowHTML}<svg class="gantt-dep-svg" viewBox="0 0 100 ${Math.max(1, rows.length * rowH)}" preserveAspectRatio="none">${dependencyArrowSVG(rows, min, total, rowH, visibleByUid, visibleByOutline)}</svg></div></div>`;
+  if (todayMs != null && todayMs >= min && todayMs <= max) {
+    requestAnimationFrame(() => {
+      const labelW = 380;
+      const x = labelW + 14 + (todayPct / 100) * timelineWidth;
+      el.scrollLeft = Math.max(0, x - el.clientWidth * 0.48);
+    });
+  }
 }
+
 function visibleEndpointForTask(task, visibleByUid, visibleByOutline) {
   if (!task) return null;
   if (visibleByUid.has(String(task.uid))) return visibleByUid.get(String(task.uid));
