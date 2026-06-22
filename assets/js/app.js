@@ -27,6 +27,11 @@ function slug(s) { return String(s || '').toLowerCase().normalize('NFD').replace
 function d(v) { if (!v) return null; const x = new Date(v); return isNaN(x) ? null : x; }
 function day(v) { const x = d(v); return x ? new Date(x.getFullYear(), x.getMonth(), x.getDate()) : null; }
 function fmt(v) { const x = d(v); return x ? x.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Sin fecha'; }
+function monthShort(v) {
+  const x = d(v);
+  const names = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
+  return x ? `${names[x.getMonth()]} - ${String(x.getFullYear()).slice(-2)}` : '';
+}
 function pct(n) { return Math.max(0, Math.min(100, Math.round(Number(n) || 0))); }
 function projectById(id) { return DATA.projects.find(p => p.id === id); }
 function isSummary(t) { return !!t?.is_summary || !!t?.summary || String(t?.type || '').toLowerCase() === 'summary'; }
@@ -687,6 +692,36 @@ function taskByKey(key) {
   return null;
 }
 
+function monthStart(v) {
+  const x = d(v) || new Date();
+  return new Date(x.getFullYear(), x.getMonth(), 1);
+}
+function addMonths(v, n) {
+  return new Date(v.getFullYear(), v.getMonth() + n, 1);
+}
+function ganttMonthScale(min, max, total) {
+  const labels = [];
+  const lines = [];
+  let count = 0;
+  let cursor = monthStart(min);
+  const end = addMonths(monthStart(max), 1);
+  while (cursor < end) {
+    count++;
+    const next = addMonths(cursor, 1);
+    const left = Math.max(0, Math.min(100, ((cursor.getTime() - min) / total) * 100));
+    const right = Math.max(0, Math.min(100, ((next.getTime() - min) / total) * 100));
+    const width = Math.max(0, right - left);
+    if (width > 0.25) {
+      labels.push(`<span class="gantt-month" style="left:${left}%;width:${width}%">${monthShort(cursor)}</span>`);
+    }
+    if (left > 0 && left < 100) {
+      lines.push(`<i class="gantt-month-line" style="left:${left}%"></i>`);
+    }
+    cursor = next;
+  }
+  return { labels: labels.join(''), lines: lines.join(''), count };
+}
+
 function renderGantt(pid) {
   const p = projectById(pid), el = qs('gantt-' + pid);
   if (!el) return;
@@ -698,6 +733,8 @@ function renderGantt(pid) {
   const today = day(CONTROL_DATE);
   const todayPct = today ? Math.max(0, Math.min(100, ((today - min) / total) * 100)) : 0;
   const rowH = 56;
+  const scale = ganttMonthScale(min, max, total);
+  const timelineW = Math.max(980, scale.count * 120);
   const visibleByUid = new Map(rows.map((t, i) => [String(t.uid), { t, i }]));
   const visibleByOutline = new Map(rows.map((t, i) => [String(t.outline), { t, i }]));
   const rowHTML = rows.map((t, i) => {
@@ -711,7 +748,7 @@ function renderGantt(pid) {
     const dep = dependencyState(t);
     return `<div class="gantt-row ${isSummary(t) ? 'group' : ''} ${dep.blocked && !isSummary(t) ? 'gantt-blocked' : ''}" data-uid="${esc(t.uid)}" data-index="${i}"><div class="gantt-label" style="padding-left:${pad}px">${hc ? `<button class="tree-toggle ${col ? 'collapsed' : ''}" onclick="toggleNode('${pid}','${esc(t.outline)}','gantt')">${col ? '+' : '−'}</button>` : '<span class="tree-toggle-spacer"></span>'}<span class="outline">${esc(t.outline)}</span><span class="gantt-label-name">${esc(t.name)}</span></div><div class="gantt-track"><i class="gantt-bar ${isSummary(t) ? 'summary' : progressClass(st)}" style="left:${left}%;width:${width}%"></i></div></div>`;
   }).join('');
-  el.innerHTML = `<div class="gantt-inner"><div class="gantt-tree-wrap" style="--row-h:${rowH}px"><div class="gantt-scale"><div>Actividad</div><div>${fmt(min)} - ${fmt(max)}</div></div><div class="today-line" style="left:calc(var(--label-w) + var(--gap) + ${todayPct}%);"></div>${rowHTML}<svg class="gantt-dep-svg" viewBox="0 0 100 ${Math.max(1, rows.length * rowH)}" preserveAspectRatio="none">${dependencyArrowSVG(rows, min, total, rowH, visibleByUid, visibleByOutline)}</svg></div></div>`;
+  el.innerHTML = `<div class="gantt-inner"><div class="gantt-tree-wrap" style="--row-h:${rowH}px;--timeline-w:${timelineW}px"><div class="gantt-scale"><div>Actividad</div><div class="gantt-month-scale">${scale.labels}</div></div><div class="gantt-body"><div class="gantt-grid-lines">${scale.lines}</div><div class="today-line" style="left:calc(var(--label-w) + var(--gap) + ${todayPct}%);"></div>${rowHTML}<svg class="gantt-dep-svg" viewBox="0 0 100 ${Math.max(1, rows.length * rowH)}" preserveAspectRatio="none">${dependencyArrowSVG(rows, min, total, rowH, visibleByUid, visibleByOutline)}</svg></div></div></div>`;
 }
 function visibleEndpointForTask(task, visibleByUid, visibleByOutline) {
   if (!task) return null;
@@ -721,21 +758,21 @@ function visibleEndpointForTask(task, visibleByUid, visibleByOutline) {
   return null;
 }
 function dependencyArrowSVG(rows, min, total, rowH, visibleByUid, visibleByOutline) {
-  const targetByUid = new Map(rows.map((t, i) => [String(t.uid), { t, i }]));
   let out = '';
   rows.forEach((t, i) => {
     const s = d(t.start);
     if (!s) return;
-    const x2 = ((s - min) / total) * 100;
+    const x2 = Math.max(0, Math.min(100, ((s - min) / total) * 100));
     predecessorLinks(t).forEach(l => {
       const ep = visibleEndpointForTask(l.task, visibleByUid, visibleByOutline);
       if (!ep || !d(ep.t.finish)) return;
-      const x1 = ((d(ep.t.finish) - min) / total) * 100;
+      const x1 = Math.max(0, Math.min(100, ((d(ep.t.finish) - min) / total) * 100));
       const y1 = ep.i * rowH + rowH / 2;
       const y2 = i * rowH + rowH / 2;
-      const mid = Math.max(x1 + 1, Math.min(99, (x1 + x2) / 2));
+      const entry = Math.max(0, x2 - 1.6);
+      const exit = Math.min(99, Math.max(x1 + 1.6, entry + 1.6));
       const blocked = !l.task || !isCompleteForDependency(l.task);
-      out += `<path class="gantt-dep-path ${blocked ? 'blocked' : ''}" d="M ${x1} ${y1} C ${mid} ${y1}, ${mid} ${y2}, ${x2} ${y2}"/><polygon class="gantt-dep-head ${blocked ? 'blocked' : ''}" points="${x2},${y2} ${x2 - 1.2},${y2 - 2.5} ${x2 - 1.2},${y2 + 2.5}"/>`;
+      out += `<path class="gantt-dep-path ${blocked ? 'blocked' : ''}" d="M ${x1} ${y1} H ${exit} V ${y2} H ${entry} L ${x2} ${y2}"/><circle class="gantt-dep-dot ${blocked ? 'blocked' : ''}" cx="${x1}" cy="${y1}" r="1.4"/><polygon class="gantt-dep-head ${blocked ? 'blocked' : ''}" points="${x2},${y2} ${x2 - 1.15},${y2 - 3.2} ${x2 - 1.15},${y2 + 3.2}"/>`;
     });
   });
   return out;
